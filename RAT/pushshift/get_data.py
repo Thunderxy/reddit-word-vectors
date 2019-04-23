@@ -43,12 +43,32 @@ class Posts:
 
         return posts
 
+    def get_post_list(self, data=None):
+        """Vzame slovar (.json) ter iz njega naredi listo Post objektov z danimi atributi."""
 
-class Post(Posts):
+        post_object_lst = []
+
+        if data is None:
+            for i in range(self.n):
+                my_url = self.make_url()
+                data = Posts.get_from_pushshift(my_url)
+
+                self.before = data[-1]['created_utc']
+
+                for post in data:
+                    post_object_lst.append(Post.make_post_obj(post))
+
+        else:
+            for post in data:
+                post_object_lst.append(Post.make_post_obj(post))
+
+        return post_object_lst
+
+
+class Post:
     """subclass, ki naredi objekt iz .json fila"""
 
-    def __init__(self, author, created_utc, post_id, num_comments, score, subreddit, title, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, author, created_utc, post_id, num_comments, score, subreddit, title):
         self.author = author
         self.created_utc = created_utc
         self.post_id = post_id
@@ -58,64 +78,10 @@ class Post(Posts):
         self.title = title
 
     @staticmethod
-    def get_post_list(data):
-        """Vzame slovar (.json) ter iz njega naredi listo Post objektov z danimi atributi."""
-        post_object_lst = []
-
-        for post in data:
-            post_object_lst.append(Post(post['author'], post['created_utc'], post['id'], post['num_comments'], post['score'], post['subreddit'], post['title']))
-
-        return post_object_lst
+    def make_post_obj(post):
+        return Post(post['author'], post['created_utc'], post['id'], post['num_comments'], post['score'], post['subreddit'], post['title'])
 
 
-# nacin brez razreda:
-
-# def make_url(query, size, sort, after, before, sub):
-#     url = 'https://api.pushshift.io/reddit/search/submission/?q={}&size={}&sort={}&after={}&before={}&subreddit={}'.format(query, size, sort, after, before, sub)
-#     return url
+# my_data = Posts(n=1, size=2, sub='TheLastAirbender')
 #
-#
-# def get_from_pushshift(url):
-#     html = requests.get(url)
-#     data = json.loads(html.text)
-#     return data['data']
-#
-#
-# def from_timestamp(unix_time):
-#     return datetime.fromtimestamp(int(unix_time))
-#
-#
-# def get_mass_data(**kwargs):
-#
-#     n = kwargs.get('n', 1)
-#     query = kwargs.get('q', '')
-#     sort = kwargs.get('sort', 'desc')
-#     size = kwargs.get('size', 25)
-#     after = kwargs.get('after', '')
-#     before = kwargs.get('before', '')
-#     sub = kwargs.get('sub', '')
-#
-#     posts = pd.DataFrame(columns=['title', 'id', 'time'])
-#
-#     for i in range(n):
-#         my_url = make_url(query, size, sort, after, before, sub)
-#         data_ = get_from_pushshift(my_url)
-#
-#         before = data_[-1]['created_utc']
-#
-#         new_posts = pd.DataFrame({'title': post['title'], 'id': post['id'], 'time': from_timestamp(post['created_utc'])} for post in data_)
-#         posts = pd.concat([posts, new_posts], ignore_index=True, sort=False)
-#
-#     return posts
-#
-#
-# print(get_mass_data(sub='TheLastAirbender'))
-
-my_data = Posts(size=3, sub='TheLastAirbender')
-
-# subclass zadeva
-# link = my_data.make_url()
-# lst = my_data.get_from_pushshift(link)
-# print([i.title for i in Post.get_post_list(lst)])
-
-print(my_data.get_DataFrame())
+# print([i.title for i in my_data.get_post_list()])

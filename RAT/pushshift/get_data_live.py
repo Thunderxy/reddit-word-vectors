@@ -22,51 +22,78 @@ class Posts:
     @staticmethod
     def get_from_pushshift(url):
         html = requests.get(url)
-        data = json.loads(html.text)
-        return data['data']
+        data = json.loads(html.text)    # {'data': [{'author': ' ', ...}, {'author': ' ', ...}, ..., n], ?: [], ...}
+        if data:
+            return data['data']
+        else:
+            return None
 
     @staticmethod
     def from_timestamp(unix_time):
         return datetime.fromtimestamp(int(unix_time))
 
+    def save_posts(self, file_name):
+        data = []
+
+        for i in range(self.n):
+            my_url = self.make_url()
+            data_ = Posts.get_from_pushshift(my_url)
+
+            if data_:
+                new_data = data + data_
+                data = new_data
+
+                self.before = data[-1]['created_utc']
+                print('{} - {}'.format(i, Posts.from_timestamp(self.before)))
+            else:
+                break
+
+        with open(file_name, 'w+') as f:
+            json.dump(data, f)
+
+        print('created: {}'.format(file_name))
+
     def get_DataFrame(self):
+        """naredi pd.DataFrame iz .json lista
+        if data=None => live, else: data=file => from saved file"""
+
         posts = pd.DataFrame(columns=['title', 'id', 'time'])
 
         for i in range(self.n):
             my_url = self.make_url()
             data = Posts.get_from_pushshift(my_url)
 
-            self.before = data[-1]['created_utc']
-
-            new_posts = pd.DataFrame({'title': post['title'], 'id': post['id'], 'time': Posts.from_timestamp(post['created_utc'])} for post in data)
-            posts = pd.concat([posts, new_posts], ignore_index=True, sort=False)
+            if data:
+                self.before = data[-1]['created_utc']
+                new_posts = pd.DataFrame({'title': post['title'], 'id': post['id'],
+                                          'time': Posts.from_timestamp(post['created_utc'])} for post in data)
+                posts = pd.concat([posts, new_posts], ignore_index=True, sort=False)
+            else:
+                break
 
         return posts
 
-    def get_post_list(self, data=None):
-        """Vzame slovar (.json) ter iz njega naredi listo Post objektov z danimi atributi."""
+    def get_post_list(self):
+        """Vzame .json kot list ter iz njega naredi listo Post objektov z danimi atributi."""
 
         post_object_lst = []
 
-        if data is None:
-            for i in range(self.n):
-                my_url = self.make_url()
-                data = Posts.get_from_pushshift(my_url)
+        for i in range(self.n):
+            my_url = self.make_url()
+            data = Posts.get_from_pushshift(my_url)
 
+            if data:
                 self.before = data[-1]['created_utc']
-
                 for post in data:
                     post_object_lst.append(Post.make_post_obj(post))
-
-        else:
-            for post in data:
-                post_object_lst.append(Post.make_post_obj(post))
+            else:
+                break
 
         return post_object_lst
 
 
 class Post:
-    """subclass, ki naredi objekt iz .json fila"""
+    """class, ki naredi objekt iz .json"""
 
     def __init__(self, author, created_utc, post_id, num_comments, score, subreddit, title):
         self.author = author
@@ -82,6 +109,4 @@ class Post:
         return Post(post['author'], post['created_utc'], post['id'], post['num_comments'], post['score'], post['subreddit'], post['title'])
 
 
-# my_data = Posts(n=1, size=2, sub='TheLastAirbender')
-#
-# print([i.title for i in my_data.get_post_list()])
+# my_data = Posts(n=2, size=1000, sub='TheLastAirbender')

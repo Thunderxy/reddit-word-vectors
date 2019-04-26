@@ -1,8 +1,50 @@
-from RAT.pushshift.get_data import Posts
+from RAT.pushshift.get_data_static import load_posts, get_post_list, from_timestamp
 import numpy as np
 import math
-from sklearn.feature_extraction.text import CountVectorizer
+import os.path
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+
+
+def tf_sim(train_set, test_set):
+    vectorizer = CountVectorizer(stop_words='english')    # Convert a collection of text documents to a matrix of token counts
+    train_vec = vectorizer.fit_transform(train_set)       # Learn the vocabulary dictionary and return term-document matrix.
+
+    print(vectorizer.vocabulary_)
+
+    tf_matrix = vectorizer.transform(test_set)            # Transform documents to document-term matrix
+
+    sim = cosine_similarity(train_vec, tf_matrix)
+
+    return sim
+
+
+def tfidf_sim(train_set, test_set):
+    vectorizer = CountVectorizer(stop_words='english')
+    train_vec = vectorizer.fit_transform(train_set)
+
+    print(vectorizer.vocabulary_)
+
+    tf_matrix = vectorizer.transform(test_set)            # Transform documents to document-term matrix
+    tfidf = TfidfTransformer(norm='l2', smooth_idf=True)
+    tfidf.fit(tf_matrix)                                  # Learn the idf vector
+
+    tfidf_matrix = tfidf.transform(tf_matrix)             # Transform a count matrix to a tf or tf-idf representation
+
+    sim = cosine_similarity(train_vec, tfidf_matrix)
+
+    return sim
+
+
+def get_matches(n, test_set, vec):
+    vec = vec.ravel()
+    index = np.argpartition(vec, -n)[-n:]
+    sorted_index_list = index[np.argsort(vec[index])][::-1].tolist()
+
+    for i in sorted_index_list:
+        print('{:0.2f} - {}'.format(to_angle(vec.item(i))[0], test_set[i]))
+
+    return sorted_index_list
 
 
 def to_angle(vec):
@@ -16,89 +58,22 @@ def to_angle(vec):
     return lst
 
 
-post_data = Posts(n=5, size=1000, sub='TheLastAirbender').get_post_list()
-
-train_set = ['zuko iroh azula ozai ursa']
+file_name = 'atla_all.json'
+file = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../pushshift/' + file_name)
+load_posts = load_posts(file)
+post_data = get_post_list(load_posts)
 
 test_set = [i.title for i in post_data]
+train_set = ['What happened to Aang (more specifically Raava) when Azula shot him with lightning?']
 
 
-vectorizer = CountVectorizer(stop_words='english')    # Convert a collection of text documents to a matrix of token counts
-
-train_vec = vectorizer.fit_transform(train_set)     # Learn the vocabulary dictionary and return term-document matrix.
-
-print(vectorizer.vocabulary_)
-print(train_vec.toarray())
-
-
-tf_matrix = vectorizer.transform(test_set)     # Transform documents to document-term matrix
-
-sim = cosine_similarity(train_vec, tf_matrix)
-
-
-def get_index(n, vec):
-    # https://stackoverflow.com/questions/6910641/how-do-i-get-indices-of-n-maximum-values-in-a-numpy-array
-    vec = vec.ravel()
-    index = np.argpartition(vec, -n)[-n:]
-    return index[np.argsort(vec[index])][::-1].tolist()
-
-
-def index_to_post(test_set, index_lst):
-    for i in index_lst:
-        print(to_angle(sim.item(i))[0], test_set[i])
-
-
-index_to_post(test_set, get_index(15, sim))
-
-
-
-
-# smeti:
-# print('--------------------')
-# # tf-idf (term frequency - inverse document frequency)
-# # https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfTransformer.html
+# sim_vec_tf = tf_sim(train_set, test_set)
+# i_lst = get_matches(10, test_set, sim_vec_tf)
 #
-# tfidf = TfidfTransformer(norm='l2', smooth_idf=True)
-# tfidf.fit(tf_matrix)    # Learn the idf vector
-#
-# tfidf_matrix = tfidf.transform(tf_matrix)   # Transform a count matrix to a tf or tf-idf representation
-#
-# print(tfidf_matrix.toarray())
+# for i in i_lst:
+#     print(from_timestamp(post_data[i].created_utc), post_data[i].post_id)
 
-
-
-
-
-# http://blog.christianperone.com/2013/09/machine-learning-cosine-similarity-for-vector-space-models-part-iii/
+# print('@@@@@@')
 #
-#
-# from sklearn.feature_extraction.text import TfidfVectorizer
-# from sklearn.metrics.pairwise import cosine_similarity
-# import math
-# import numpy as np
-#
-#
-# documents = [
-#             'HIDDEN DETAIL - The guy who sells the cabbages in Avatar The Last Airbender and always loses them, is the same guy who sets up the cabbage corp in Legend Of Korra.',
-#             'HIDDEN DETAIL - The guy who chases down Aang and the group in Avatar The Last Airbender is the same person who joins the team later on and teaches Aang firebending! Mind Blown!!',
-#             ]
-#
-#
-# tfidf_vectorizer = TfidfVectorizer(stop_words='english', smooth_idf=True)
-# tfidf_matrix = tfidf_vectorizer.fit_transform(documents)
-# print(tfidf_vectorizer.get_feature_names())
-# # print(tfidf_matrix.toarray())
-# # print(tfidf_matrix.shape)
-#
-# sim = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix)
-#
-# lst = []
-# for i in np.nditer(sim):
-#     try:
-#         lst.append(math.degrees(math.acos(i)))
-#     except ValueError:
-#         lst.append(0.0)
-#
-# print(sim)
-# print(lst)
-#
+# sim_vec_tfidf = tfidf_sim(train_set, test_set)
+# get_matches(10, test_set, sim_vec_tfidf)

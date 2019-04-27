@@ -1,4 +1,5 @@
-from RAT.pushshift.get_data_static import load_posts, get_post_list, from_timestamp
+from RAT.pushshift.get_json_data import load_posts, get_post_list
+from RAT.pushshift.get_data import from_timestamp
 import numpy as np
 import math
 import os.path
@@ -72,7 +73,7 @@ train_set = ['What happened to Aang (more specifically Raava) when Azula shot hi
 #
 # for i in i_lst:
 #     print(from_timestamp(post_data[i].created_utc), post_data[i].post_id)
-
+#
 # print('@@@@@@')
 #
 # sim_vec_tfidf = tfidf_sim(train_set, test_set)

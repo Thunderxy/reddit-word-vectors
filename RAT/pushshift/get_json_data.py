@@ -1,11 +1,6 @@
 import json
 import pandas as pd
-from datetime import datetime
-from RAT.pushshift.get_data_live import Post
-
-
-def from_timestamp(unix_time):
-    return datetime.fromtimestamp(int(unix_time))
+from RAT.pushshift.get_data import Post, from_timestamp
 
 
 def load_posts(file_name):
@@ -31,4 +26,5 @@ def get_post_list(data):
     return post_object_lst
 
 
-# posts = load_posts('atla_all.json')
+# posts = load_posts('')
+# posts_lst = get_post_list(posts)

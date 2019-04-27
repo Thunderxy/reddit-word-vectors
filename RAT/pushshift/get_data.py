@@ -28,10 +28,6 @@ class Posts:
         else:
             return None
 
-    @staticmethod
-    def from_timestamp(unix_time):
-        return datetime.fromtimestamp(int(unix_time))
-
     def save_posts(self, file_name):
         data = []
 
@@ -44,7 +40,7 @@ class Posts:
                 data = new_data
 
                 self.before = data[-1]['created_utc']
-                print('{} - {}'.format(i, Posts.from_timestamp(self.before)))
+                print('{} - {}'.format(i, from_timestamp(self.before)))
             else:
                 break
 
@@ -66,7 +62,7 @@ class Posts:
             if data:
                 self.before = data[-1]['created_utc']
                 new_posts = pd.DataFrame({'title': post['title'], 'id': post['id'],
-                                          'time': Posts.from_timestamp(post['created_utc'])} for post in data)
+                                          'time': from_timestamp(post['created_utc'])} for post in data)
                 posts = pd.concat([posts, new_posts], ignore_index=True, sort=False)
             else:
                 break
@@ -109,4 +105,10 @@ class Post:
         return Post(post['author'], post['created_utc'], post['id'], post['num_comments'], post['score'], post['subreddit'], post['title'])
 
 
-# my_data = Posts(n=2, size=1000, sub='TheLastAirbender')
+def from_timestamp(unix_time):
+    return datetime.fromtimestamp(int(unix_time))
+
+
+# my_data = Posts(n=1, size=1000, sub='')
+#
+# my_data.save_posts('')

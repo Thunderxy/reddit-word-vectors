@@ -1,4 +1,4 @@
-from RAT.pushshift.get_json_data import load_posts, get_post_list
+from RAT.pushshift.file_processing import load_posts, get_post_list
 from RAT.pushshift.get_data import from_timestamp
 import numpy as np
 import math

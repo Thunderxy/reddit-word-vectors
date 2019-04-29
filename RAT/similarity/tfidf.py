@@ -1,8 +1,7 @@
-from RAT.pushshift.file_processing import load_posts, get_post_list
+from RAT.pushshift.file_processing import json_as_obj_lst
 from RAT.pushshift.get_data import from_timestamp
 import numpy as np
 import math
-import os.path
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -59,10 +58,8 @@ def to_angle(vec):
     return lst
 
 
-file_name = 'atla_all.json'
-file = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../pushshift/' + file_name)
-load_posts = load_posts(file)
-post_data = get_post_list(load_posts)
+file_name = '.json.gz'
+post_data = json_as_obj_lst(file_name)
 
 test_set = [i.title for i in post_data]
 train_set = ['What happened to Aang (more specifically Raava) when Azula shot him with lightning?']

@@ -1,14 +1,6 @@
-from RAT.pushshift.file_processing import load_posts, get_post_list
-import os
+from RAT.pushshift.file_processing import json_as_obj_lst
 import operator
 import re
-
-
-def json_as_obj_lst(file_name):
-    """Converts json to list of Post objects."""
-    file = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../pushshift/' + file_name)
-    load = load_posts(file)
-    return get_post_list(load)
 
 
 def remove_punctuation(text):
@@ -56,4 +48,4 @@ def count_words(tokenized_lst):
     return sorted_pairs
 
 
-# post = clean_posts('.json')
+posts = clean_posts('json.gz')

@@ -1,10 +1,12 @@
 import requests
 import json
+import gzip
 from datetime import datetime
 import pandas as pd
 
 
 class Posts:
+    """Makes Posts object from pushshift link."""
 
     def __init__(self, n=1, query='', sort='desc', size=1, after='', before='', sub=''):
         self.n = n
@@ -29,6 +31,7 @@ class Posts:
             return None
 
     def save_posts(self, file_name):
+        """Saves Posts from pushshift to .json.gz ."""
         data = []
 
         for i in range(self.n):
@@ -44,14 +47,16 @@ class Posts:
             else:
                 break
 
-        with open(file_name, 'w+') as f:
-            json.dump(data, f)
+        json_str = json.dumps(data)
+        json_bytes = json_str.encode('utf-8')
+
+        with gzip.GzipFile(file_name, 'w+') as f:
+            f.write(json_bytes)
 
         print('created: {}'.format(file_name))
 
     def get_DataFrame(self):
-        """naredi pd.DataFrame iz .json lista
-        if data=None => live, else: data=file => from saved file"""
+        """Makes pd.DataFrame from Posts (works live)."""
 
         posts = pd.DataFrame(columns=['title', 'id', 'time'])
 
@@ -70,7 +75,7 @@ class Posts:
         return posts
 
     def get_post_list(self):
-        """Vzame .json kot list ter iz njega naredi listo Post objektov z danimi atributi."""
+        """Makes list of objects Post and saves them to list (works live)."""
 
         post_object_lst = []
 
@@ -89,7 +94,7 @@ class Posts:
 
 
 class Post:
-    """class, ki naredi objekt iz .json"""
+    """Makes Post from dict (json)."""
 
     def __init__(self, author, created_utc, post_id, num_comments, score, subreddit, title):
         self.author = author
@@ -106,6 +111,7 @@ class Post:
 
 
 def from_timestamp(unix_time):
+    """unix time -> utc time"""
     return datetime.fromtimestamp(int(unix_time))
 
 

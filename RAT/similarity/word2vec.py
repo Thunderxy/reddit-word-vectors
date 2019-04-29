@@ -7,7 +7,7 @@ import multiprocessing
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 
-file_name = '.json'
+file_name = '.json.gz'
 post_data = clean_posts(file_name)
 
 cores = multiprocessing.cpu_count()

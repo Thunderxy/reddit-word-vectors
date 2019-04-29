@@ -1,4 +1,4 @@
 venv/
 .idea
-atla_all.json
+atla_all.json.gz
 atla.json

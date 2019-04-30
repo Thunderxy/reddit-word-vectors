@@ -33,6 +33,13 @@ def clean_posts(file_name):
     return clean_text
 
 
+def clean_text(text):
+    # words = remove_stopword(tokenization(remove_punctuation(i.title)))
+    words = tokenization(remove_punctuation(text))
+
+    return words
+
+
 def count_words(tokenized_lst):
     word_count = {}
 
@@ -48,4 +55,4 @@ def count_words(tokenized_lst):
     return sorted_pairs
 
 
-posts = clean_posts('json.gz')
+# posts = clean_posts('json.gz')

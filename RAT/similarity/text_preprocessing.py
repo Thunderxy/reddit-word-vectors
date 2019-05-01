@@ -34,7 +34,7 @@ def clean_posts(file_name):
 
 
 def clean_text(text):
-    # words = remove_stopword(tokenization(remove_punctuation(i.title)))
+    # words = remove_stopword(tokenization(remove_punctuation(text)))
     words = tokenization(remove_punctuation(text))
 
     return words

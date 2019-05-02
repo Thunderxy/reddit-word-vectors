@@ -40,7 +40,7 @@ def clean_text(text):
     return words
 
 
-def count_words(tokenized_lst):
+def count_words(tokenized_lst, sort=None):
     word_count = {}
 
     for word_lst in tokenized_lst:
@@ -50,9 +50,10 @@ def count_words(tokenized_lst):
             else:
                 word_count[word] = 0
 
-    sorted_pairs = sorted(word_count.items(), key=operator.itemgetter(1))
-
-    return sorted_pairs
+    if sort:
+        return sorted(word_count.items(), key=operator.itemgetter(1))
+    else:
+        return word_count
 
 
 # posts = clean_posts('json.gz')

@@ -1,7 +1,7 @@
 from RAT.similarity.text_preprocessing import clean_posts, clean_text
 from RAT.similarity.word2vec import make_model, cos_sim
 import numpy as np
-import heapq
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 def post2vec(posts, model, size=300):
@@ -12,42 +12,37 @@ def post2vec(posts, model, size=300):
 
     for post in posts:
 
-        sum_post = np.zeros(shape=(1, size))
+        sum_post = np.zeros(size)
 
         for word in post:
             try:
                 sum_post += model[word]
             except KeyError:
-                sum_post += np.zeros(shape=(1, size))
+                sum_post += np.zeros(size)
 
         if np.count_nonzero(sum_post) == 0:
             sum_post += 1e-6
 
         post_vec_lst.append(sum_post)
 
-    return post_vec_lst
+    post_mat = np.array(post_vec_lst)
+
+    return post_mat
 
 
 def post_sim(compare_str, posts, model):
     compare_vec = post2vec(clean_text(compare_str), model)
     posts_vec = post2vec(posts, model)
 
-    sim_lst = []
-
-    for post_vec in posts_vec:
-        sim_lst.append(cos_sim(compare_vec, post_vec))
-
-    return sim_lst
+    return cosine_similarity(compare_vec, posts_vec).ravel()
 
 
-def most_similar(sim_lst, post_data, n=100):
-    top_nums = heapq.nlargest(n, sim_lst)
+def most_similar(sim_vec, post_data, n=100):
 
-    for count, num in enumerate(top_nums):
-        ind = sim_lst.index(num)
-        s = ' '.join(post_data[ind])
+    sort_ind = sim_vec.argsort()[::-1][:n]
 
-        print('{}: | cos = {:0.2f} | {}'.format(count, num, s))
+    for i, j in enumerate(sort_ind):
+        print('{}: {}'.format(i, ' '.join(post_data[j])))
 
 
 file_name = '.json.gz'

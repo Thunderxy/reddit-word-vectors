@@ -1,5 +1,5 @@
 from RAT.similarity.text_preprocessing import clean_posts, clean_text
-from RAT.similarity.word2vec import make_model, cos_sim
+from RAT.similarity.word2vec import make_model
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 

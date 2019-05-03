@@ -2,3 +2,4 @@ venv/
 .idea
 atla_all.json.gz
 atla.json
+data

@@ -1,6 +1,8 @@
 from RAT.pushshift.file_processing import json_as_obj_lst
 import operator
 import re
+import pickle
+import os
 
 
 def remove_punctuation(text):
@@ -56,4 +58,22 @@ def count_words(tokenized_lst, sort=None):
         return word_count
 
 
-# posts = clean_posts('json.gz')
+def pickle_this(data, file_name):
+    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + file_name + '.pickle')
+
+    with open(path, 'wb') as f:
+        pickle.dump(data, f)
+
+
+def unpickle_this(file_name):
+    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + file_name + '.pickle')
+
+    with open(path, 'rb') as f:
+        data = pickle.load(f)
+
+    return data
+
+
+# file_name = 'atla_all.json.gz'
+# post_data = clean_posts(file_name)
+# save = pickle_this(post_data, '')

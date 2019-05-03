@@ -2,10 +2,9 @@
 # https://stackoverflow.com/questions/22129943/how-to-calculate-the-sentence-similarity-using-word2vec-model-of-gensim-with-pyt
 # https://github.com/PrincetonML/SIF
 # https://github.com/peter3125/sentence2vec/blob/master/sentence2vec.py
-# TODO: make this thing
 
-from RAT.similarity.text_preprocessing import clean_posts, clean_text, count_words
-from RAT.similarity.word2vec import make_model
+from RAT.similarity.text_preprocessing import unpickle_this, clean_text, count_words
+from RAT.similarity.word2vec import load_model
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import PCA
@@ -15,10 +14,8 @@ def get_freq(posts):
     return count_words(posts)
 
 
-def post2vec(posts, model, size=300):
+def post2vec(posts, model, word_dct, size=300, a=0.001):
     post_vec_lst = []
-
-    word_dct = get_freq(posts)
 
     if isinstance(posts[0], str):
         posts = [posts]
@@ -29,12 +26,9 @@ def post2vec(posts, model, size=300):
 
         for word in post:
             try:
-                sum_post += model[word] * (1 / (1 + word_dct[word]))
+                sum_post += model[word] * (a / (a + word_dct[word]))
             except KeyError:
                 sum_post += np.zeros(size)
-
-        if np.count_nonzero(sum_post) == 0:
-            sum_post += 1e-6
 
         post_vec_lst.append(sum_post)
 
@@ -43,18 +37,17 @@ def post2vec(posts, model, size=300):
     return post_mat
 
 
-def post_sim(compare_str, posts, model):
-    compare_vec = post2vec(clean_text(compare_str), model)
-    posts_vec = post2vec(posts, model)
+def post_sim(compare_str, posts, model, word_dct):
+    compare_vec = post2vec(clean_text(compare_str), model, word_dct)
+    posts_vec = post2vec(posts, model, word_dct)
 
     sentence_set = posts_vec
-
     pca = PCA()
     pca.fit(np.array(sentence_set))
-    u = pca.components_[0]  # the PCA vector
+    u = pca.components_[0]
     u = np.multiply(u, np.transpose(u))  # u x uT
 
-    # resulting sentence vectors, vs = vs -u x uT x vs
+    # vs = vs -u x uT x vs
     sentence_vecs = []
     for vs in sentence_set:
         sub = np.multiply(u, vs)
@@ -73,10 +66,10 @@ def most_similar(sim_vec, post_data, n=100):
         print('{}: {}'.format(i, ' '.join(post_data[j])))
 
 
-file_name = '.json.gz'
-post_data = clean_posts(file_name)
-my_model = make_model(post_data, size_=300, window_=2, min_count_=2, epochs_=10)
+post_data = unpickle_this('')
+my_model = load_model('')
 
-sim_nums = post_sim("", post_data, my_model)
+get_word_dct = get_freq(post_data)
 
+sim_nums = post_sim("", post_data, my_model, get_word_dct)
 most_similar(sim_nums, post_data)

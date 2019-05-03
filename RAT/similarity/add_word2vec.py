@@ -1,5 +1,5 @@
-from RAT.similarity.text_preprocessing import clean_posts, clean_text
-from RAT.similarity.word2vec import make_model
+from RAT.similarity.text_preprocessing import clean_posts, clean_text, unpickle_this
+from RAT.similarity.word2vec import load_model
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -45,10 +45,10 @@ def most_similar(sim_vec, post_data, n=100):
         print('{}: {}'.format(i, ' '.join(post_data[j])))
 
 
-file_name = '.json.gz'
-post_data = clean_posts(file_name)
-my_model = make_model(post_data, size_=300, window_=2, min_count_=2, epochs_=10)
+post_data = unpickle_this('')
+my_model = load_model('')
 
 sim_nums = post_sim("", post_data, my_model)
-
 most_similar(sim_nums, post_data)
+
+# see: My reaction to the cartoon vs my reaction to the movie (result: reaction == response)

@@ -1,4 +1,3 @@
-from RAT.pushshift.file_processing import json_as_obj_lst
 from RAT.pushshift.get_data import from_timestamp
 import numpy as np
 import math
@@ -23,7 +22,7 @@ def tfidf_sim(train_set, test_set):
     vectorizer = CountVectorizer(stop_words='english')
     train_vec = vectorizer.fit_transform(train_set)
 
-    print(vectorizer.vocabulary_)
+    print('Vocabulary:', vectorizer.vocabulary_)
 
     tf_matrix = vectorizer.transform(test_set)            # Transform documents to document-term matrix
     tfidf = TfidfTransformer(norm='l2', smooth_idf=True)
@@ -36,13 +35,13 @@ def tfidf_sim(train_set, test_set):
     return sim
 
 
-def get_matches(n, test_set, vec):
+def get_matches(n, post_data, vec):
     vec = vec.ravel()
     index = np.argpartition(vec, -n)[-n:]
     sorted_index_list = index[np.argsort(vec[index])][::-1].tolist()
 
     for i in sorted_index_list:
-        print('{:0.2f} - {}'.format(to_angle(vec.item(i))[0], test_set[i]))
+        print('{:0.2f} | {} | {} | {}'.format(vec.item(i), from_timestamp(post_data[i].created_utc), post_data[i].post_id, post_data[i].title))
 
     return sorted_index_list
 
@@ -56,22 +55,3 @@ def to_angle(vec):
             lst.append(0.0)
 
     return lst
-
-
-file_name = '.json.gz'
-post_data = json_as_obj_lst(file_name)
-
-test_set = [i.title for i in post_data]
-train_set = ['What happened to Aang (more specifically Raava) when Azula shot him with lightning?']
-
-
-# sim_vec_tf = tf_sim(train_set, test_set)
-# i_lst = get_matches(10, test_set, sim_vec_tf)
-#
-# for i in i_lst:
-#     print(from_timestamp(post_data[i].created_utc), post_data[i].post_id)
-#
-# print('@@@@@@')
-#
-# sim_vec_tfidf = tfidf_sim(train_set, test_set)
-# get_matches(10, test_set, sim_vec_tfidf)

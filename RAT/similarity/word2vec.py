@@ -4,7 +4,6 @@ import os
 import logging
 import multiprocessing
 import numpy as np
-from RAT.similarity.text_preprocessing import unpickle_this
 
 
 def make_model(post_data, size_=300, window_=2, min_count_=2, epochs_=1):
@@ -20,12 +19,12 @@ def make_model(post_data, size_=300, window_=2, min_count_=2, epochs_=1):
 
 
 def save_model(file_name, model):
-    path = get_tmpfile(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + file_name + '.model'))
+    path = get_tmpfile(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + file_name))
     model.save(path)
 
 
 def load_model(file_name):
-    path = get_tmpfile(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + file_name + '.model'))
+    path = get_tmpfile(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + file_name))
     return Word2Vec.load(path)
 
 
@@ -39,15 +38,3 @@ def cos_sim(a, b):
         return 0
     else:
         return angle
-
-
-# post_data = unpickle_this('')
-# my_model = make_model(post_data, size_=300, window_=2, min_count_=2, epochs_=1)
-#
-# save_model('', my_model)
-
-
-# print(model.wv.similarity('', ''))
-
-# for i in my_model.wv.most_similar(positive=[''], topn=100):
-#     print(i)

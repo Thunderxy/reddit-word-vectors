@@ -1,4 +1,3 @@
-from RAT.pushshift.file_processing import json_as_obj_lst
 import operator
 import re
 import pickle
@@ -23,8 +22,7 @@ def remove_stopword(tokenized_lst):
     return no_stopwords
 
 
-def clean_posts(file_name):
-    posts = json_as_obj_lst(file_name)
+def clean_posts(posts):
     clean_text = []
 
     for i in posts:
@@ -59,21 +57,16 @@ def count_words(tokenized_lst, sort=None):
 
 
 def pickle_this(data, file_name):
-    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + file_name + '.pickle')
+    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + file_name)
 
     with open(path, 'wb') as f:
         pickle.dump(data, f)
 
 
 def unpickle_this(file_name):
-    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + file_name + '.pickle')
+    path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + file_name)
 
     with open(path, 'rb') as f:
         data = pickle.load(f)
 
     return data
-
-
-# file_name = 'atla_all.json.gz'
-# post_data = clean_posts(file_name)
-# save = pickle_this(post_data, '')

@@ -1,10 +1,4 @@
-# smooth inverese frequency
-# https://stackoverflow.com/questions/22129943/how-to-calculate-the-sentence-similarity-using-word2vec-model-of-gensim-with-pyt
-# https://github.com/PrincetonML/SIF
-# https://github.com/peter3125/sentence2vec/blob/master/sentence2vec.py
-
-from RAT.similarity.text_preprocessing import unpickle_this, clean_text, count_words
-from RAT.similarity.word2vec import load_model
+from RAT.similarity.text_preprocessing import clean_text, count_words
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import PCA
@@ -64,12 +58,3 @@ def most_similar(sim_vec, post_data, n=100):
 
     for i, j in enumerate(sort_ind):
         print('{}: {}'.format(i, ' '.join(post_data[j])))
-
-
-post_data = unpickle_this('')
-my_model = load_model('')
-
-get_word_dct = get_freq(post_data)
-
-sim_nums = post_sim("", post_data, my_model, get_word_dct)
-most_similar(sim_nums, post_data)

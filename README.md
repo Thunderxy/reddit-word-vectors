@@ -2,7 +2,7 @@
 Doing stuff with Reddit using https://pushshift.io/ and https://github.com/praw-dev/praw .
 
 
-
+## Working with not saving posts:
 ### How to get posts from reddit
 ```Python
 In [1]: from RAT.pushshift.get_data import Posts
@@ -14,7 +14,6 @@ In [2]: my_data = Posts(n=1, size=25, sub='askreddit')
 ```Python
 In [3]: Posts_lst=my_data.get_post_list()    
 In [4]: Posts_df=my_data.get_DataFrame() 
-
 In [5]: Posts_lst 
 ```
 
@@ -71,3 +70,13 @@ Out[10]:
 
 https://github.com/pushshift/api for more info on parameters
 
+
+## Working with saving posts:
+### Saving posts to .json.gz
+```Python
+In [1]: my_data.save_posts('askreddit_data.json.gz')                                                                                                  
+0 - 2019-05-11 18:06:04    # time of last post
+created: askreddit_data.json.gz
+```
+
+note: 

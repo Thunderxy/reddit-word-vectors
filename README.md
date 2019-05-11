@@ -1,11 +1,14 @@
 # RAT (Reddit analysis tool)
 Doing stuff with Reddit using https://pushshift.io/ and https://github.com/praw-dev/praw .
 
+
+
 ### How to get posts from reddit
 ```Python
 In [1]: from RAT.pushshift.get_data import Posts
 In [2]: my_data = Posts(n=1, size=25, sub='askreddit')     
 ```
+
 
 ### Get posts in list format or in DataFrame format
 ```Python
@@ -32,9 +35,12 @@ Out[6]:
 ...
 ```
 
+
 ### How to access post information from Posts object
 ```Python
 In [7]: titles = [i.title for i in Posts_lst]  
+```
+```
 Out[7]: 
 ['Redditors who’ve forgiven a significant other that cheated, why did you forgive them?',
  'What are some of the unwritten rules followed by men/women?',
@@ -42,18 +48,20 @@ Out[7]:
  ...]
  # posts are different from Posts_df beacuse r/askreddit gets alot of new conetent and we only looked at 25 new ones
 ```
-converting unix time to utc:
+#### Converting unix time to utc:
+
 ```Python
 In [8]: from RAT.pushshift.get_data import from_timestamp 
 In [9]: created_utc = [from_timestamp(i.created_utc) for i in Posts_lst] 
-In [10]: created_utc                                                                                                                                   
+In [10]: created_utc 
+```
+```
 Out[10]: 
 [datetime.datetime(2019, 5, 11, 18, 12, 43),
  datetime.datetime(2019, 5, 11, 18, 12, 43),
  datetime.datetime(2019, 5, 11, 18, 12, 41),
 ...]
 ```
-
 
 https://github.com/pushshift/api for more info on parameters
 

@@ -2,8 +2,8 @@
 Doing stuff with Reddit using https://pushshift.io/ and https://github.com/praw-dev/praw .
 
 
-## Working with not saving posts:
-### How to get posts from reddit
+## Working without saving posts:
+### How to get posts from reddit using https://pushshift.io/
 ```Python
 In [1]: from RAT.pushshift.get_data import Posts
 In [2]: my_data = Posts(n=1, size=25, sub='askreddit')     
@@ -53,8 +53,8 @@ Out[7]:
  ...]
  # posts are different from Posts_df beacuse r/askreddit gets alot of new conetent and we only looked at 25 new ones
 ```
-#### Converting unix time to utc:
 
+#### Converting unix time to utc:
 ```Python
 In [8]: from RAT.pushshift.get_data import from_timestamp 
 In [9]: created_utc = [from_timestamp(i.created_utc) for i in Posts_lst] 
@@ -71,12 +71,28 @@ Out[10]:
 https://github.com/pushshift/api for more info on parameters
 
 
+
 ## Working with saving posts:
 ### Saving posts to .json.gz
 ```Python
-In [1]: my_data.save_posts('askreddit_data.json.gz')                                                                                                  
+In [1]: from RAT.pushshift.get_data import Posts
+In [2]: my_data = Posts(n=1, size=25, sub='askreddit')
+In [3]: my_data.save_posts('askreddit_data.json.gz')    # saves .json from pushshift
+
 0 - 2019-05-11 18:06:04    # time of last post
 created: askreddit_data.json.gz
 ```
 
-note: 
+### Loading saved posts
+```Python
+In [4]: from RAT.pushshift.get_data import fPosts   
+In [5]: my_file = fPosts('askreddit.json.gz')                                                                                                          
+In [6]: my_file.get_posts_list(my_file.load_posts())     # load file and convert it to list of Post objects
+```
+```
+Out[6]: 
+[<RAT.pushshift.get_data.Post at 0x7f568f782080>,
+ <RAT.pushshift.get_data.Post at 0x7f568f7829e8>,
+ <RAT.pushshift.get_data.Post at 0x7f568f6c04a8>,
+...]
+```

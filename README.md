@@ -2,7 +2,7 @@
 Doing stuff with Reddit using https://pushshift.io/ and https://github.com/praw-dev/praw .
 
 
-## Working without saving posts:
+## Working without saving posts
 ### How to get posts from reddit using https://pushshift.io/
 ```Python
 In [1]: from RAT.pushshift.get_data import Posts
@@ -72,7 +72,7 @@ https://github.com/pushshift/api for more info on parameters
 
 
 
-## Working with saved posts:
+## Working with saved posts
 ### Saving posts to .json.gz
 ```Python
 In [1]: from RAT.pushshift.get_data import Posts
@@ -96,11 +96,10 @@ Out[7]:
 ```
 
 
-## Post comparison
-examples for all post titles from r/TheLastAirbender
+## Post comparison using tf and tf-idf
+using posts from r/TheLastAirbender for example (~130000 total posts)
 
-### tf and tf-idf
-see for info: http://blog.christianperone.com/2013/09/machine-learning-cosine-similarity-for-vector-space-models-part-iii/
+info: http://blog.christianperone.com/2013/09/machine-learning-cosine-similarity-for-vector-space-models-part-iii/
 ```Python
 In [8]: from RAT.similarity.tfidf import tf_sim
 In [9]: test_set = [i.title for i in Posts]   
@@ -125,3 +124,73 @@ Vocabulary: {'happened': 2, 'aang': 0, 'specifically': 6, 'raava': 4, 'azula': 1
 0.65 | 2013-09-21 00:18:16 | 1mszvf | What happened to the Waterbending Avatar from when Aang was killed by Azula?
 ```
 note: different results, tfidf not the best for such sentance compariosn
+
+
+## word2vec
+https://radimrehurek.com/gensim/models/word2vec.html
+using posts from r/TheLastAirbender for example (~130000 total posts)
+
+### Text preprocessing
+```Python
+In [1]: from RAT.similarity.text_preprocessing import clean_posts   
+In [2]: post_data = clean_posts(Posts)   # removed punctuation and tokenized
+```
+#### Pickiling post data
+```Python
+In [3]: from RAT.similarity.text_preprocessing import pickle_this
+In [4]: pickle_this(post_data, 'data.pickle')
+```
+
+### Making word2vec model
+```Python
+In [1]: from RAT.similarity.word2vec import make_model  
+In [2]: post_data = unpickle_this('data.pickle')
+In [3]: my_model = make_model(post_data, size_=300, window_=2, min_count_=2, epochs_=5)
+```
+
+### Saving word2vec model
+```Python
+In [4]: save_model('data.model', my_model)
+```
+
+### Testing word2vec model
+```Python
+print(my_model.wv.similarity('aang', 'zuko'))
+
+for i in my_model.wv.most_similar(positive=['aang'], topn=10):
+     print(i)
+
+# both using cosine similarity
+```
+results:
+```
+0.5819699
+
+('sokka', 0.6768596172332764)
+('azula', 0.6717315912246704)
+('toph', 0.6593050956726074)
+('roku', 0.6275879144668579)
+('katara', 0.612399697303772)
+```
+
+## Post comparsion using word2vec
+### Summing word2vec vectors
+```Python
+In [1]: from RAT.similarity.add_word2vec import post_sim, most_similar
+In [2]: post_data = unpickle_this('data.pickle')
+In [3]: my_model = load_model('data.model')
+In [4]: sim_nums = post_sim("My reaction to the cartoon vs my reaction to the movie", post_data, my_model)
+In [5]: most_similar(sim_nums, post_data, 10)
+```
+results:
+```
+0: my reaction to the revelation
+1: my reaction to the comedianamon meme
+2: my reaction to the engagement rings
+3: my reaction to the engagement rings
+4: b4e13 my reaction to the ending
+5: my response to the tla movie
+6: b4e13 my response to the ending
+
+reaction == response
+```

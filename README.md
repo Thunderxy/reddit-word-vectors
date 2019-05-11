@@ -17,15 +17,19 @@ In [4]: Posts_df=my_data.get_DataFrame()
 
 In [5]: Posts_lst 
 ```
+
 ```
 Out[5]: 
 [<RAT.pushshift.get_data.Post at 0x7f7de778deb8>,
  <RAT.pushshift.get_data.Post at 0x7f7de778d198>,
  <RAT.pushshift.get_data.Post at 0x7f7de778d0f0>,
 ...]
+```
+
 ```Python
 In [6]: Posts_df   
 ```
+
 ```
 Out[6]: 
                                                title      id                time

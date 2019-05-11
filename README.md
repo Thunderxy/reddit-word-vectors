@@ -72,27 +72,55 @@ https://github.com/pushshift/api for more info on parameters
 
 
 
-## Working with saving posts:
+## Working with saved posts:
 ### Saving posts to .json.gz
 ```Python
 In [1]: from RAT.pushshift.get_data import Posts
 In [2]: my_data = Posts(n=1, size=25, sub='askreddit')
 In [3]: my_data.save_posts('askreddit_data.json.gz')    # saves .json from pushshift
-
-0 - 2019-05-11 18:06:04    # time of last post
-created: askreddit_data.json.gz
 ```
 
 ### Loading saved posts
 ```Python
 In [4]: from RAT.pushshift.get_data import fPosts   
 In [5]: my_file = fPosts('askreddit.json.gz')                                                                                                          
-In [6]: my_file.get_posts_list(my_file.load_posts())     # load file and convert it to list of Post objects
+In [6]: Posts = my_file.get_posts_list(my_file.load_posts())     # load file and convert it to list of Post objects
+In [7]: Posts
 ```
 ```
-Out[6]: 
+Out[7]: 
 [<RAT.pushshift.get_data.Post at 0x7f568f782080>,
  <RAT.pushshift.get_data.Post at 0x7f568f7829e8>,
  <RAT.pushshift.get_data.Post at 0x7f568f6c04a8>,
 ...]
 ```
+
+
+## Post comparison
+examples for all post titles from r/TheLastAirbender
+
+### tf and tf-idf
+```Python
+In [8]: from RAT.similarity.tfidf import tf_sim
+In [9]: test_set = [i.title for i in Posts]   
+In [10]: train_set = ['What happened to Aang (more specifically Raava) when Azula shot him with lightning?']
+In [11]: sim_vec_tf = tf_sim(train_set, test_set)
+In [12]: i_lst = get_matches(3, Posts, sim_vec_tf)    # also returns sorted index list
+```
+```
+Vocabulary: {'happened': 2, 'aang': 0, 'specifically': 6, 'raava': 4, 'azula': 1, 'shot': 5, 'lightning': 3}
+1.00 | 2019-04-26 02:09:42 | bhfu4l | What happened to Aang (more specifically Raava) when Azula shot him with lightning?
+0.76 | 2018-02-26 00:34:24 | 808i00 |... but the ability was blocked when he was shot with Azula’s lightning.
+0.65 | 2018-07-02 16:21:11 | 8vizzt | Aang has the scar from Azula's lightning in a scene that ...
+```
+```Python
+In [13]: sim_vec_tfidf = tfidf_sim(train_set, test_set)
+In [14]: get_matches(10, Posts, sim_vec_tfidf)
+```
+```
+Vocabulary: {'happened': 2, 'aang': 0, 'specifically': 6, 'raava': 4, 'azula': 1, 'shot': 5, 'lightning': 3}
+0.98 | 2019-04-26 02:09:42 | bhfu4l | What happened to Aang (more specifically Raava) when Azula shot him with lightning?
+0.74 | 2018-02-26 00:34:24 | 808i00 | ... but the ability was blocked when he was shot with Azula’s lightning.
+0.65 | 2013-09-21 00:18:16 | 1mszvf | What happened to the Waterbending Avatar from when Aang was killed by Azula?
+```
+note: different results, tfidf not the best for such sentance compariosn

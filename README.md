@@ -196,7 +196,7 @@ reaction == response
 ```
 
 ### Using smooth inverse frequency
-https://github.com/PrincetonML/SIF
+https://github.com/PrincetonML/SIF, 
 https://github.com/peter3125/sentence2vec/blob/master/sentence2vec.py
 
 ```Python

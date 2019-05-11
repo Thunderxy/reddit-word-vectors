@@ -194,3 +194,26 @@ results:
 
 reaction == response
 ```
+
+### Using smooth inverse frequency
+https://github.com/PrincetonML/SIF
+https://github.com/peter3125/sentence2vec/blob/master/sentence2vec.py
+
+```Python
+In [1]: from RAT.similarity.sif_word2vec import post_sim, most_similar   
+In [2]: post_data = unpickle_this('data.pickle')
+In [3]: my_model = load_model('data.model')
+In [4]: get_word_dct = get_freq(post_data)    # word count for inverse frequency
+In [5]: sim_nums = post_sim("My reaction to the cartoon vs my reaction to the movie", post_data, my_model, get_word_dct)
+In [6]: most_similar(sim_nums, post_data)
+```
+results:
+```
+0: avatar the last airbender trailer reaction
+1: avatar the last airbender how to end a cartoon part 3
+2: avatar the last airbender how to end a cartoon part 1
+3: fan content cartoon korra
+4: the legend of korra as a 20s30sstyle cartoon
+5: avatar the cartoon
+6: no spoilers sokka is one of the best cartoon characters of all time
+```

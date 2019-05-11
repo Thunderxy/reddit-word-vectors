@@ -1,6 +1,7 @@
 import requests
 import json
 import gzip
+import os
 from datetime import datetime
 import pandas as pd
 
@@ -50,7 +51,8 @@ class Posts:
         json_str = json.dumps(data)
         json_bytes = json_str.encode('utf-8')
 
-        with gzip.GzipFile(file_name, 'w+') as f:
+        file_name_ = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + file_name)
+        with gzip.GzipFile(file_name_, 'w+') as f:
             f.write(json_bytes)
 
         print('created: {}'.format(file_name))
@@ -110,11 +112,38 @@ class Post:
         return Post(post['author'], post['created_utc'], post['id'], post['num_comments'], post['score'], post['subreddit'], post['title'])
 
 
+class fPosts:
+    """Loading saved file."""
+
+    def __init__(self, file_name):
+        self.file_name = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + file_name)
+
+    def load_posts(self):
+        with gzip.GzipFile(self.file_name) as f:
+            json_bytes = f.read()
+
+        json_str = json_bytes.decode('utf-8')
+        data = json.loads(json_str)
+
+        return data
+
+    @staticmethod
+    def get_DataFrame(data):
+        posts = pd.DataFrame({'title': post['title'], 'id': post['id'],
+                              'time': from_timestamp(post['created_utc'])} for post in data)
+
+        return posts
+
+    @staticmethod
+    def get_posts_list(data):
+        post_object_lst = []
+
+        for post in data:
+            post_object_lst.append(Post.make_post_obj(post))
+
+        return post_object_lst
+
+
 def from_timestamp(unix_time):
     """unix time -> utc time"""
     return datetime.fromtimestamp(int(unix_time))
-
-
-# my_data = Posts(n=1, size=1000, sub='')
-#
-# my_data.save_posts('')

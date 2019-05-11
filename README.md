@@ -100,6 +100,7 @@ Out[7]:
 examples for all post titles from r/TheLastAirbender
 
 ### tf and tf-idf
+see for info: http://blog.christianperone.com/2013/09/machine-learning-cosine-similarity-for-vector-space-models-part-iii/
 ```Python
 In [8]: from RAT.similarity.tfidf import tf_sim
 In [9]: test_set = [i.title for i in Posts]   

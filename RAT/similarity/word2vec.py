@@ -18,6 +18,10 @@ def make_model(post_data, size_=300, window_=2, min_count_=2, epochs_=1):
     return model
 
 
+def normalize_vecs(model):
+    model.init_sims(replace=True)
+
+
 def save_model(file_name, model):
     path = get_tmpfile(os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + file_name))
     model.save(path)

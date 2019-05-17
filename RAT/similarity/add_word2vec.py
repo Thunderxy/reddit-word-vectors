@@ -19,9 +19,6 @@ def post2vec(posts, model, size=300):
             except KeyError:
                 sum_post += np.zeros(size)
 
-        if np.count_nonzero(sum_post) == 0:
-            sum_post += 1e-6
-
         post_vec_lst.append(sum_post)
 
     post_mat = np.array(post_vec_lst)

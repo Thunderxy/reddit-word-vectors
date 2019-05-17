@@ -1,11 +1,7 @@
-from RAT.similarity.text_preprocessing import clean_text, count_words
+from RAT.similarity.text_preprocessing import clean_text
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import PCA
-
-
-def get_freq(posts):
-    return count_words(posts)
 
 
 def post2vec(posts, model, word_dct, size=300, a=0.001):

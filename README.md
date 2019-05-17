@@ -54,7 +54,7 @@ Out[7]:
  # posts are different from Posts_df beacuse r/askreddit gets alot of new conetent and we only looked at 25 new ones
 ```
 
-#### Converting unix time to utc:
+### Converting unix time to utc:
 ```Python
 In [8]: from RAT.pushshift.get_data import from_timestamp 
 In [9]: created_utc = [from_timestamp(i.created_utc) for i in Posts_lst] 
@@ -135,10 +135,16 @@ using posts from r/TheLastAirbender for example (~130000 total posts)
 In [1]: from RAT.similarity.text_preprocessing import clean_posts   
 In [2]: post_data = clean_posts(Posts)   # removed punctuation and tokenized
 ```
-#### Pickiling post data
+### Counting words
 ```Python
-In [3]: from RAT.similarity.text_preprocessing import pickle_this
-In [4]: pickle_this(post_data, 'data.pickle')
+In [3]: from RAT.similarity.text_preprocessing import count_words
+In [4]: count_words(post_data, sort=None)    # sort=True, returns list of tuples of most common words
+```
+
+### Pickiling post data
+```Python
+In [5]: from RAT.similarity.text_preprocessing import pickle_this
+In [6]: pickle_this(post_data, 'data.pickle')
 ```
 
 ### Making word2vec model
@@ -148,9 +154,11 @@ In [2]: post_data = unpickle_this('data.pickle')
 In [3]: my_model = make_model(post_data, size_=300, window_=2, min_count_=2, epochs_=5)
 ```
 
-### Saving word2vec model
+### Saving and loading word2vec model
 ```Python
-In [4]: save_model('data.model', my_model)
+In [5]: from RAT.similarity.word2vec import save_model, load_model 
+In [5]: save_model('data.model', my_model)
+In [6]: load_model('data.model')
 ```
 
 ### Testing word2vec model

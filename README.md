@@ -209,11 +209,12 @@ https://github.com/peter3125/sentence2vec/blob/master/sentence2vec.py
 
 ```Python
 In [1]: from RAT.similarity.sif_word2vec import post_sim, most_similar   
-In [2]: post_data = unpickle_this('data.pickle')
-In [3]: my_model = load_model('data.model')
-In [4]: get_word_dct = get_freq(post_data)    # word count for inverse frequency
-In [5]: sim_nums = post_sim("My reaction to the cartoon vs my reaction to the movie", post_data, my_model, get_word_dct)
-In [6]: most_similar(sim_nums, post_data)
+In [2]: from RAT.similarity.text_preprocessing import count_words
+In [3]: post_data = unpickle_this('data.pickle')
+In [4]: my_model = load_model('data.model')
+In [5]: get_word_dct = get_freq(post_data)    # word count for inverse frequency
+In [6]: sim_nums = post_sim("My reaction to the cartoon vs my reaction to the movie", post_data, my_model, get_word_dct)
+In [7]: most_similar(sim_nums, post_data)
 ```
 results:
 ```

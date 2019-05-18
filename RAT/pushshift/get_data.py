@@ -4,10 +4,13 @@ import gzip
 import os
 from datetime import datetime
 import pandas as pd
+from time import time
 
 
 class Posts:
     """Makes Posts object from pushshift link."""
+
+    s = requests.Session()
 
     def __init__(self, n=1, query='', sort='desc', size=1, after='', before='', sub=''):
         self.n = n
@@ -24,7 +27,7 @@ class Posts:
 
     @staticmethod
     def get_from_pushshift(url):
-        html = requests.get(url)
+        html = Posts.s.get(url)
         data = json.loads(html.text)    # {'data': [{'author': ' ', ...}, {'author': ' ', ...}, ..., n], ?: [], ...}
         if data:
             return data['data']
@@ -36,6 +39,7 @@ class Posts:
         data = []
 
         for i in range(self.n):
+            start = time()
             my_url = self.make_url()
             data_ = Posts.get_from_pushshift(my_url)
 
@@ -44,7 +48,7 @@ class Posts:
                 data = new_data
 
                 self.before = data[-1]['created_utc']
-                print('{} - {}'.format(i, from_timestamp(self.before)))
+                print('{} - {} @ {} s'.format(i, from_timestamp(self.before), time() - start))
             else:
                 break
 

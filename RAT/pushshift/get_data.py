@@ -4,7 +4,7 @@ import gzip
 import os
 from datetime import datetime
 import pandas as pd
-from time import time
+import time
 
 
 class Posts:
@@ -12,7 +12,7 @@ class Posts:
 
     s = requests.Session()
 
-    def __init__(self, n=1, query='', sort='desc', size=1, after='', before='', sub=''):
+    def __init__(self, n=int(1e12), query='', sort='desc', size=25, after='', before=int(time.time()), sub=''):
         self.n = n
         self.query = query
         self.sort = sort
@@ -39,7 +39,7 @@ class Posts:
         data = []
 
         for i in range(self.n):
-            start = time()
+            start = time.time()
             my_url = self.make_url()
             data_ = Posts.get_from_pushshift(my_url)
 
@@ -48,7 +48,7 @@ class Posts:
                 data = new_data
 
                 self.before = data[-1]['created_utc']
-                print('{} - {} @ {} s'.format(i, from_timestamp(self.before), time() - start))
+                print('{} - {} @ {} s'.format(i, from_timestamp(self.before), time.time() - start))
             else:
                 break
 

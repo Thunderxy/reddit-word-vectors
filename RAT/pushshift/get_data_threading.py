@@ -2,47 +2,15 @@ import requests
 import json
 import gzip
 import os
-from datetime import datetime
 import time
 import threading
 import logging
+from RAT.pushshift.classes import Posts, from_timestamp
 
 s = requests.Session()
 data = []
 api_calls = 0
 start_time = 0
-
-
-class Posts:
-    """Creates Posts object from pushshift link.
-
-    Note:
-        n or time must be specified.
-
-    Args:
-        n: Number of API calls.
-        query: Not supported (look at pushshift docs).
-        sort: Descending or ascending. Defaults to 'desc'.
-        size: Number of objects in API call (max 1000 per call).
-        after(int): Unix timestamp.
-        before(int): Unix timestamp.
-        subreddit: Subreddit, if '' then r/all.
-
-    TODO: Do something with 1e12.
-    """
-
-    def __init__(self, n=int(1e12), query='', sort='desc', size=25, after=0, before=int(time.time()), subreddit=''):
-        self.n = n
-        self.query = query
-        self.sort = sort
-        self.size = size
-        self.after = after
-        self.before = before
-        self.sub = subreddit
-
-    def make_url(self):
-        url = 'https://api.pushshift.io/reddit/search/submission/?q={}&size={}&sort={}&after={}&before={}&subreddit={}'.format(self.query, self.size, self.sort, self.after, self.before, self.sub)
-        return url
 
 
 def get_from_pushshift(url, thread_name):
@@ -122,7 +90,7 @@ def get_data(my_data, thread_num=1):
 
     """
     global start_time
-    start = time.time()
+    start_time = time.time()
     intervals = get_intervals(my_data, thread_num)
     threads_lst = []
 
@@ -134,14 +102,12 @@ def get_data(my_data, thread_num=1):
         t.start()
         threads_lst.append(t)
         print('{} has started'.format(t.name))
-        time.sleep(3)
-
-    start_time = time.time()
+        time.sleep(1)
 
     for t in threads_lst:
         t.join()
 
-    print('total time: {} s'.format(time.time() - start))
+    print('total time: {} s'.format(time.time() - start_time))
     return data
 
 
@@ -194,11 +160,6 @@ def save_posts(file_name):
     print('created: {}'.format(file_name))
 
 
-def from_timestamp(unix_time):
-    """unix time -> utc time"""
-    return datetime.fromtimestamp(int(unix_time))
-
-
 def throttler(thread_name):
     """Throttles API connection.
 
@@ -218,4 +179,8 @@ def throttler(thread_name):
 
     if limit > 1.5:
         logging.warning('limit @ {} calls/s - sleeping {}'.format(limit, thread_name))
-        time.sleep(5)
+        time.sleep(3)
+
+
+r_data = Posts(after=1558699200, size=1000, subreddit='askreddit')
+get_data(r_data, 3)

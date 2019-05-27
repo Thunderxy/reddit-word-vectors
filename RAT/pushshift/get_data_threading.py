@@ -14,16 +14,8 @@ start_time = 0
 
 
 def get_from_pushshift(url, thread_name):
-    """Pulls data from pushshift API.
+    """Pulls data from pushshift API."""
 
-    Args:
-        url: Address for accessing API. From Posts.make_url().
-        thread_name: Name of thread.
-
-    Returns:
-        Json data from API.
-        None if API returns [].
-    """
     get_from = s.get(url)
 
     while get_from.status_code != 200:
@@ -39,22 +31,8 @@ def get_from_pushshift(url, thread_name):
 
 
 def thread_posts(posts_obj, thread_name):
-    """Main function for threading.
+    """Main function for threading."""
 
-    Gets url from Posts object and uses get_from_pushshift to get data. If data then gets last time from json and
-    continuous from there. If not data then breaks.
-
-    Note:
-        Saves all json data to global data list.
-
-    Args:
-        posts_obj: Posts.
-        thread_name: Name of thread.
-
-    Returns:
-        None
-
-    """
     global data
 
     n = posts_obj.n
@@ -77,18 +55,8 @@ def thread_posts(posts_obj, thread_name):
 
 
 def get_data(my_data, thread_num=1):
-    """Thread initialization function.
+    """Thread initialization function."""
 
-    Makes thread_num of threads. Gives each thread a Posts object with different time intervals.
-
-    Args:
-        my_data: Posts object.
-        thread_num: Number of given threads.
-
-    Returns:
-        data: All data gathered from API.
-
-    """
     global start_time
     start_time = time.time()
     intervals = get_intervals(my_data, thread_num)
@@ -112,18 +80,7 @@ def get_data(my_data, thread_num=1):
 
 
 def get_intervals(my_data, n):
-    """Make time intervals.
-
-    Given after and before make equidistant time intervals.
-
-    Args:
-        my_data: Posts object with after/before.
-        n: Number of threads.
-
-    Returns:
-        intervals: n equidistant intervals.
-
-    """
+    """Make time intervals."""
 
     t1 = int(my_data.after)
     t2 = int(my_data.before)
@@ -137,15 +94,8 @@ def get_intervals(my_data, n):
 
 
 def save_posts(file_name):
-    """Saves data to file_name.json.gz .
+    """Saves data to file_name.json.gz ."""
 
-    Args:
-        file_name: File name.
-
-    Returns:
-        None
-
-    """
     global data
 
     logging.info('saving to file...')
@@ -161,17 +111,8 @@ def save_posts(file_name):
 
 
 def throttler(thread_name):
-    """Throttles API connection.
+    """Throttles API connection."""
 
-    Sleeps threads if api_calls/s > 1.5 .
-
-    Args:
-        thread_name: Thread name.
-
-    Returns:
-        None
-
-    """
     global api_calls
     api_calls += 1
 

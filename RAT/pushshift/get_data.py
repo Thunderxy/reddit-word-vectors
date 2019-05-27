@@ -11,15 +11,8 @@ s = requests.Session()
 
 
 def get_from_pushshift(url):
-    """Pulls data from pushshift API.
+    """Pulls data from pushshift API."""
 
-    Args:
-        url: Address for accessing API. From Posts.make_url().
-
-    Returns:
-        Json data from API.
-        None if API returns [].
-    """
     html = s.get(url)
     data = json.loads(html.text)
     if data:
@@ -29,16 +22,8 @@ def get_from_pushshift(url):
 
 
 def save_posts(my_data, file_name):
-    """Saves posts from pushshift. No threading version.
+    """Saves posts from pushshift. No threading version."""
 
-    Args:
-        my_data: Posts object.
-        file_name: File name
-
-    Returns:
-        Saved file and None.
-
-    """
     data = []
 
     for i in range(my_data.n):
@@ -66,15 +51,7 @@ def save_posts(my_data, file_name):
 
 
 def get_DataFrame(my_data):
-    """Makes Pandas DataFrame from posts.
-
-    Args:
-        my_data: Posts object
-
-    Returns:
-        Posts DataFrame.
-
-    """
+    """Makes Pandas DataFrame from posts."""
 
     posts = pd.DataFrame(columns=['title', 'id', 'time'])
 
@@ -93,14 +70,6 @@ def get_DataFrame(my_data):
 
 
 def get_post_list(my_data):
-    """
-
-    Args:
-        my_data:
-
-    Returns:
-
-    """
 
     post_object_lst = []
 
@@ -119,14 +88,6 @@ def get_post_list(my_data):
 
 
 def get_post_gen(my_data):
-    """
-
-    Args:
-        my_data:
-
-    Returns:
-
-    """
 
     while True:
         my_url = my_data.make_url()

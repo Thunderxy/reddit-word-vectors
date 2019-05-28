@@ -19,7 +19,7 @@ def get_from_pushshift(url, thread_name):
     get_from = s.get(url)
 
     while get_from.status_code != 200:
-        logging.warning('to many requests, sleeping {}'.format(thread_name))
+        thread_log.warning('to many requests sleeping {}'.format(thread_name))
         time.sleep(5)
         get_from = s.get(url)
 
@@ -45,38 +45,13 @@ def thread_posts(posts_obj, thread_name):
         if data_:
             data += data_
             posts_obj.before = data_[-1]['created_utc']
-            print('cycle: {} on {} - {} @ {} s'.format(i, thread_name, from_timestamp(posts_obj.before), time.time() - start))
+            thread_log.info('{} on cycle: {} | runtime: {} | last post date: {}'.format(thread_name, i, time.time() - start, from_timestamp(posts_obj.before)))
         else:
             break
 
         throttler(thread_name)
 
-    print('\n{} has finished\n'.format(thread_name))
-
-
-def get_data(my_data, thread_num=1):
-    """Thread initialization function."""
-
-    global start_time
-    start_time = time.time()
-    intervals = get_intervals(my_data, thread_num)
-    threads_lst = []
-
-    for i in range(thread_num):
-
-        my_data_ = Posts(after=intervals[i][0], before=intervals[i][1], size=my_data.size, subreddit=my_data.sub, sort=my_data.sort)
-
-        t = threading.Thread(target=thread_posts, name='thread {}'.format(i), args=(my_data_, 'thread {}'.format(i)))
-        t.start()
-        threads_lst.append(t)
-        print('{} has started'.format(t.name))
-        time.sleep(1)
-
-    for t in threads_lst:
-        t.join()
-
-    print('total time: {} s'.format(time.time() - start_time))
-    return data
+    thread_log.info('{} done'.format(thread_name))
 
 
 def get_intervals(my_data, n):
@@ -91,6 +66,30 @@ def get_intervals(my_data, n):
         intervals.append([t1 + delta_t*i, t1 + delta_t*(i+1) - 1])
 
     return intervals
+
+
+def get_data(my_data, thread_num=1):
+    """Thread initialization function."""
+
+    global start_time
+    start_time = time.time()
+    intervals = get_intervals(my_data, thread_num)
+    threads_lst = []
+
+    for i in range(thread_num):
+
+        my_data_ = Posts(after=intervals[i][0], before=intervals[i][1], size=my_data.size, subreddit=my_data.sub, sort=my_data.sort)
+
+        t = threading.Thread(target=thread_posts, name='thread{}'.format(i), args=(my_data_, 'thread{}'.format(i)))
+        t.start()
+        threads_lst.append(t)
+        print('{} has started'.format(t.name))
+
+    for t in threads_lst:
+        t.join()
+
+    print('total time: {} s'.format(time.time() - start_time))
+    return data
 
 
 def save_posts(file_name):
@@ -112,16 +111,45 @@ def save_posts(file_name):
 
 def throttler(thread_name):
     """Throttles API connection."""
+    # TODO fix this
 
     global api_calls
     api_calls += 1
 
+    print(api_calls)
+
     limit = api_calls / (time.time() - start_time)
 
-    if limit > 1.5:
-        logging.warning('limit @ {} calls/s - sleeping {}'.format(limit, thread_name))
-        time.sleep(3)
+    if limit > 1:
+        thread_log.warning('{} @ {} calls/s, throttling'.format(thread_name, limit))
+        time.sleep(5)
+
+
+def setup_logger(name=__name__, log_file='name.log', level=logging.INFO, format='%(asctime)s: %(levelname)s: %(message)s', print_to_console=False):
+
+    try:
+        os.remove(log_file)
+    except OSError:
+        pass
+
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+
+    formatter = logging.Formatter(format)
+
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setFormatter(formatter)
+
+    logger.addHandler(file_handler)
+
+    if print_to_console:
+        logging.debug('')
+
+    return logger
+
+
+thread_log = setup_logger(log_file='thread_log', level=logging.DEBUG, print_to_console=True)
 
 
 r_data = Posts(after=1558699200, size=1000, subreddit='askreddit')
-get_data(r_data, 3)
+get_data(r_data, 5)

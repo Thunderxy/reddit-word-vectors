@@ -116,8 +116,6 @@ def throttler(thread_name):
     global api_calls
     api_calls += 1
 
-    print(api_calls)
-
     limit = api_calls / (time.time() - start_time)
 
     if limit > 1:
@@ -148,8 +146,8 @@ def setup_logger(name=__name__, log_file='name.log', level=logging.INFO, format=
     return logger
 
 
-thread_log = setup_logger(log_file='thread_log', level=logging.DEBUG, print_to_console=True)
-
-
-r_data = Posts(after=1558699200, size=1000, subreddit='askreddit')
-get_data(r_data, 5)
+# thread_log = setup_logger(log_file='thread_log', level=logging.DEBUG, print_to_console=True)
+#
+#
+# r_data = Posts(after=1558699200, size=1000, subreddit='askreddit')
+# get_data(r_data, 5)

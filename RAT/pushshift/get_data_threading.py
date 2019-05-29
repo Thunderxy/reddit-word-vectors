@@ -7,10 +7,12 @@ import threading
 import logging
 from RAT.pushshift.classes import Posts, from_timestamp
 
+
 s = requests.Session()
+lock = threading.Lock()
 data = []
-api_calls = 0
-start_time = 0
+api_calls = [0]
+global_time = time.time()
 
 
 def get_from_pushshift(url, thread_name):
@@ -21,7 +23,12 @@ def get_from_pushshift(url, thread_name):
     while get_from.status_code != 200:
         thread_log.warning('to many requests sleeping {}'.format(thread_name))
         time.sleep(5)
-        get_from = s.get(url)
+
+        try:
+            get_from = s.get(url)
+        except requests.exceptions.RequestException as e:
+            thread_log.error('error in requests: {}'.format(e))
+            get_from = 0
 
     ps_data = json.loads(get_from.text)
     if ps_data:
@@ -30,14 +37,18 @@ def get_from_pushshift(url, thread_name):
         return None
 
 
-def thread_posts(posts_obj, thread_name):
+def thread_posts(posts_obj, thread_name, max_per_sec):
     """Main function for threading."""
 
     global data
+    global api_calls
 
     n = posts_obj.n
     for i in range(n):
-        start = time.time()
+        throttler(thread_name, max_per_sec)
+        api_calls[0] += 1
+
+        start_time = time.time()
 
         my_url = posts_obj.make_url()
         data_ = get_from_pushshift(my_url, thread_name)
@@ -45,11 +56,9 @@ def thread_posts(posts_obj, thread_name):
         if data_:
             data += data_
             posts_obj.before = data_[-1]['created_utc']
-            thread_log.info('{} on cycle: {} | runtime: {} | last post date: {}'.format(thread_name, i, time.time() - start, from_timestamp(posts_obj.before)))
+            thread_log.info('{} on cycle: {} | runtime: {} | last post date: {}'.format(thread_name, i, time.time() - start_time, from_timestamp(posts_obj.before)))
         else:
             break
-
-        throttler(thread_name)
 
     thread_log.info('{} done'.format(thread_name))
 
@@ -68,10 +77,9 @@ def get_intervals(my_data, n):
     return intervals
 
 
-def get_data(my_data, thread_num=1):
+def get_data(my_data, thread_num=5, max_per_sec=1):
     """Thread initialization function."""
 
-    global start_time
     start_time = time.time()
     intervals = get_intervals(my_data, thread_num)
     threads_lst = []
@@ -79,8 +87,8 @@ def get_data(my_data, thread_num=1):
     for i in range(thread_num):
 
         my_data_ = Posts(after=intervals[i][0], before=intervals[i][1], size=my_data.size, subreddit=my_data.sub, sort=my_data.sort)
-
-        t = threading.Thread(target=thread_posts, name='thread{}'.format(i), args=(my_data_, 'thread{}'.format(i)))
+        time.sleep(1)
+        t = threading.Thread(target=thread_posts, name='thread{}'.format(i), args=(my_data_, 'thread{}'.format(i), max_per_sec))
         t.start()
         threads_lst.append(t)
         print('{} has started'.format(t.name))
@@ -88,7 +96,7 @@ def get_data(my_data, thread_num=1):
     for t in threads_lst:
         t.join()
 
-    print('total time: {} s'.format(time.time() - start_time))
+    print('total time: {} s\ntotal api calls: {}'.format(time.time() - start_time, api_calls[0]))
     return data
 
 
@@ -109,18 +117,25 @@ def save_posts(file_name):
     print('created: {}'.format(file_name))
 
 
-def throttler(thread_name):
+def throttler(thread_name, max_per_sec=1):
     """Throttles API connection."""
-    # TODO fix this
 
-    global api_calls
-    api_calls += 1
+    global global_time
 
-    limit = api_calls / (time.time() - start_time)
+    lock.acquire()
 
-    if limit > 1:
-        thread_log.warning('{} @ {} calls/s, throttling'.format(thread_name, limit))
-        time.sleep(5)
+    delta_t = time.time() - global_time
+    limit = 1 / delta_t
+    throttle_for = abs(2 - delta_t)     # better ideas?
+
+    global_time = time.time()
+
+    if limit > max_per_sec:
+        thread_log.warning('{} @ {} calls/s, throttling for {} s'.format(thread_name, limit, throttle_for))
+        lock.release()
+        time.sleep(throttle_for)
+    else:
+        lock.release()
 
 
 def setup_logger(name=__name__, log_file='name.log', level=logging.INFO, format='%(asctime)s: %(levelname)s: %(message)s', print_to_console=False):
@@ -146,8 +161,8 @@ def setup_logger(name=__name__, log_file='name.log', level=logging.INFO, format=
     return logger
 
 
-# thread_log = setup_logger(log_file='thread_log', level=logging.DEBUG, print_to_console=True)
-#
-#
+thread_log = setup_logger(log_file='thread_log', level=logging.DEBUG, print_to_console=True)
+
+
 # r_data = Posts(after=1558699200, size=1000, subreddit='askreddit')
-# get_data(r_data, 5)
+# get_data(r_data, 5, 1)

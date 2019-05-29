@@ -36,7 +36,7 @@ class Posts:
 class Post:
     """Makes Post from dict (json)."""
 
-    def __init__(self, author, created_utc, post_id, num_comments, score, subreddit, title):
+    def __init__(self, author, created_utc, post_id, num_comments, score, subreddit, title, selftext):
         self.author = author
         self.created_utc = created_utc
         self.post_id = post_id
@@ -44,10 +44,11 @@ class Post:
         self.score = score
         self.subreddit = subreddit
         self.title = title
+        self.selftext = selftext
 
     @staticmethod
     def make_post_obj(post):
-        return Post(post['author'], post['created_utc'], post['id'], post['num_comments'], post['score'], post['subreddit'], post['title'])
+        return Post(post['author'], post['created_utc'], post['id'], post['num_comments'], post['score'], post['subreddit'], post['title'], post['selftext'])
 
 
 def from_timestamp(unix_time):

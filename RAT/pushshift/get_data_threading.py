@@ -7,7 +7,6 @@ import threading
 import logging
 from RAT.pushshift.classes import Posts, from_timestamp
 
-
 s = requests.Session()
 lock = threading.Lock()
 data = []
@@ -15,154 +14,171 @@ api_calls = [0]
 global_time = time.time()
 
 
-def get_from_pushshift(url, thread_name):
-    """Pulls data from pushshift API."""
+class GetPosts:
 
-    get_from = s.get(url)
+    def __init__(self, posts, thread_num=1, max_per_sec=1, make_log=False):
+        self.posts = posts
+        self.thread_num = thread_num
+        self.max_per_sec = max_per_sec
 
-    while get_from.status_code != 200:
-        thread_log.warning('to many requests sleeping {}'.format(thread_name))
-        time.sleep(5)
+        if make_log:
+            self.thread_log = make_log.setup_logger()
+        else:
+            self.thread_log = logging.getLogger()
+            self.thread_log.disabled = True
 
-        try:
-            get_from = s.get(url)
-        except requests.exceptions.RequestException as e:
-            thread_log.error('error in requests: {}'.format(e))
-            get_from = 0
-
-    ps_data = json.loads(get_from.text)
-    if ps_data:
-        return ps_data['data']
-    else:
-        return None
-
-
-def thread_posts(posts_obj, thread_name, max_per_sec):
-    """Main function for threading."""
-
-    global data
-    global api_calls
-
-    n = posts_obj.n
-    for i in range(n):
-        throttler(thread_name, max_per_sec)
-        api_calls[0] += 1
+    def get_data(self):
+        """Thread initialization function."""
 
         start_time = time.time()
+        intervals = self.get_intervals()
+        threads_lst = []
 
-        my_url = posts_obj.make_url()
-        data_ = get_from_pushshift(my_url, thread_name)
+        for i in range(self.thread_num):
+            my_data_ = Posts(after=intervals[i][0], before=intervals[i][1], size=self.posts.size, subreddit=self.posts.sub, sort=self.posts.sort)
+            t = threading.Thread(target=self.thread_posts, name='thread{}'.format(i), args=(my_data_, 'thread{}'.format(i)))
+            time.sleep(1 / self.max_per_sec)
+            t.start()
+            threads_lst.append(t)
+            print('{} has started'.format(t.name))
 
-        if data_:
-            data += data_
-            posts_obj.before = data_[-1]['created_utc']
-            thread_log.info('{} on cycle: {} | runtime: {} | last post date: {}'.format(thread_name, i, time.time() - start_time, from_timestamp(posts_obj.before)))
+        for t in threads_lst:
+            t.join()
+
+        print('total time: {} s\ntotal api calls: {}'.format(time.time() - start_time, api_calls[0]))
+        return data
+
+    def get_intervals(self):
+        """Make time intervals."""
+
+        t1 = int(self.posts.after)
+        t2 = int(self.posts.before)
+        delta_t = int((t2 - t1) / self.thread_num)
+
+        intervals = []
+        for i in range(self.thread_num):
+            intervals.append([t1 + delta_t * i, t1 + delta_t * (i + 1) - 1])
+
+        return intervals
+
+    def thread_posts(self, i_posts, thread_name):
+        """Main function for threading."""
+
+        global data
+        global api_calls
+
+        n = self.posts.n
+        for i in range(n):
+            self.throttler(thread_name)
+            api_calls[0] += 1
+
+            start_time = time.time()
+
+            my_url = i_posts.make_url()
+            data_ = self.get_from_pushshift(my_url, thread_name)
+
+            if data_:
+                with lock:
+                    data += data_
+
+                i_posts.before = data_[-1]['created_utc']
+                self.thread_log.info('{} on cycle: {} | runtime: {} | last post date: {}'.format(thread_name, i, time.time() - start_time, from_timestamp(i_posts.before)))
+            else:
+                break
+
+        self.thread_log.info('{} done'.format(thread_name))
+
+    def get_from_pushshift(self, url, thread_name):
+        """Pulls data from pushshift API."""
+
+        get_from = s.get(url)
+
+        while get_from.status_code != 200:
+            self.thread_log.warning('to many requests sleeping {}'.format(thread_name))
+            time.sleep(5)
+
+            try:
+                get_from = s.get(url)
+            except requests.exceptions.RequestException as e:
+                self.thread_log.error('error in requests: {}'.format(e))
+                get_from = 0
+
+        ps_data = json.loads(get_from.text)
+        if ps_data:
+            return ps_data['data']
         else:
-            break
+            return None
 
-    thread_log.info('{} done'.format(thread_name))
+    def throttler(self, thread_name):
+        """Throttles API connection."""
 
+        global global_time
 
-def get_intervals(my_data, n):
-    """Make time intervals."""
+        lock.acquire()
 
-    t1 = int(my_data.after)
-    t2 = int(my_data.before)
-    delta_t = int((t2 - t1) / n)
+        delta_t = time.time() - global_time
+        limit = 1 / delta_t
+        throttle_for = abs((1 / self.max_per_sec) - delta_t)
 
-    intervals = []
-    for i in range(n):
-        intervals.append([t1 + delta_t*i, t1 + delta_t*(i+1) - 1])
+        global_time = time.time()
 
-    return intervals
-
-
-def get_data(my_data, thread_num=5, max_per_sec=1):
-    """Thread initialization function."""
-
-    start_time = time.time()
-    intervals = get_intervals(my_data, thread_num)
-    threads_lst = []
-
-    for i in range(thread_num):
-
-        my_data_ = Posts(after=intervals[i][0], before=intervals[i][1], size=my_data.size, subreddit=my_data.sub, sort=my_data.sort)
-        time.sleep(1)
-        t = threading.Thread(target=thread_posts, name='thread{}'.format(i), args=(my_data_, 'thread{}'.format(i), max_per_sec))
-        t.start()
-        threads_lst.append(t)
-        print('{} has started'.format(t.name))
-
-    for t in threads_lst:
-        t.join()
-
-    print('total time: {} s\ntotal api calls: {}'.format(time.time() - start_time, api_calls[0]))
-    return data
+        if limit > self.max_per_sec:
+            self.thread_log.warning('{} @ {} calls/s, throttling for {} s'.format(thread_name, limit, throttle_for))
+            lock.release()
+            time.sleep(throttle_for)
+        else:
+            lock.release()
 
 
-def save_posts(file_name):
-    """Saves data to file_name.json.gz ."""
+class LoggerConfig:
 
-    global data
+    def __init__(self, name=__name__, log_file='threads.log', level=logging.DEBUG, log_format='%(asctime)s: %(levelname)s: %(message)s', print_to_console=False):
+        self.name = name
+        self.log_file = log_file
+        self.level = level
+        self.log_format = log_format
+        self.print_to_console = print_to_console
 
-    logging.info('saving to file...')
+    def setup_logger(self):
 
-    json_str = json.dumps(data)
-    json_bytes = json_str.encode('utf-8')
+        try:
+            os.remove(self.log_file)
+        except OSError:
+            pass
 
-    file_name_ = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + file_name)
-    with gzip.GzipFile(file_name_, 'w+') as f:
-        f.write(json_bytes)
+        logger = logging.getLogger(self.name)
+        logger.setLevel(self.level)
 
-    print('created: {}'.format(file_name))
+        formatter = logging.Formatter(self.log_format)
 
+        file_handler = logging.FileHandler(self.log_file)
+        file_handler.setFormatter(formatter)
 
-def throttler(thread_name, max_per_sec=1):
-    """Throttles API connection."""
+        logger.addHandler(file_handler)
 
-    global global_time
+        if self.print_to_console:
+            logging.debug('')
 
-    lock.acquire()
-
-    delta_t = time.time() - global_time
-    limit = 1 / delta_t
-    throttle_for = abs(2 - delta_t)     # better ideas?
-
-    global_time = time.time()
-
-    if limit > max_per_sec:
-        thread_log.warning('{} @ {} calls/s, throttling for {} s'.format(thread_name, limit, throttle_for))
-        lock.release()
-        time.sleep(throttle_for)
-    else:
-        lock.release()
+        return logger
 
 
-def setup_logger(name=__name__, log_file='name.log', level=logging.INFO, format='%(asctime)s: %(levelname)s: %(message)s', print_to_console=False):
+class SavePosts:
 
-    try:
-        os.remove(log_file)
-    except OSError:
-        pass
+    def __init__(self, file_name):
+        self.file_name = file_name
 
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
+    def save_posts(self):
+        """Saves data to file_name.json.gz ."""
 
-    formatter = logging.Formatter(format)
+        global data
 
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setFormatter(formatter)
+        logging.info('saving to file...')
 
-    logger.addHandler(file_handler)
+        json_str = json.dumps(data)
+        json_bytes = json_str.encode('utf-8')
 
-    if print_to_console:
-        logging.debug('')
+        file_name_ = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + self.file_name)
+        with gzip.GzipFile(file_name_, 'w+') as f:
+            f.write(json_bytes)
 
-    return logger
-
-
-thread_log = setup_logger(log_file='thread_log', level=logging.DEBUG, print_to_console=True)
-
-
-# r_data = Posts(after=1558699200, size=1000, subreddit='askreddit')
-# get_data(r_data, 5, 1)
+        print('created: {}'.format(self.file_name))

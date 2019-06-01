@@ -105,7 +105,3 @@ def get_posts_gen(my_data):
             break
 
         yield post_object_lst
-
-#
-# r_data = Posts(n=10, subreddit='askreddit')
-# x = get_post_gen(r_data)

@@ -1,9 +1,20 @@
-# UPDATE README!
-
 # RAT (Reddit analysis tool)
 Doing stuff with Reddit using https://pushshift.io/ and https://github.com/praw-dev/praw .
 
 
+## Get posts with threading from pushshift and save them to .json.gz:
+```Python
+from RAT.pushshift.get_data_threading import LoggerConfig, GetPosts, SavePosts # logging is optional
+from RAT.pushshift.classes import Posts
+
+my_log = LoggerConfig(log_file='thread_log', level=logging.DEBUG, print_to_console=True)
+reddit_data = Posts(after=1559390400, size=1000, subreddit='askreddit')
+GetPosts(r_data, thread_num=5, max_per_sec=1, make_log=my_log).get_data()
+SavePosts('my_file.json.gz').save_posts()
+```
+
+------------------------------------------------------------------------------------------------------------
+## depreciated or needs docs update:
 ## Working without saving posts
 ### How to get posts from reddit using https://pushshift.io/
 ```Python
@@ -97,6 +108,7 @@ Out[7]:
 ...]
 ```
 
+------------------------------------------------------------------------------------------------------------
 
 ## Post comparison using tf and tf-idf
 using posts from r/TheLastAirbender for example (~130000 total posts)

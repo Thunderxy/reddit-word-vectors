@@ -32,7 +32,6 @@ Out[7]:
  'What are some of the unwritten rules followed by men/women?',
  '911 operators of Reddit, what was the most ridiculous thing anyone has called you for?',
  ...]
- # posts are different from Posts_df beacuse r/askreddit gets alot of new conetent and we only looked at 25 new ones
 ```
 
 ### Converting unix time to utc:
@@ -52,8 +51,6 @@ Out[10]:
 https://github.com/pushshift/api for more info on parameters
 
 
-
-
 ## No threading version (obsolete):
 ```Python
 from RAT.pushshift.get_data import get_post_list, get_DataFrame
@@ -65,7 +62,7 @@ posts_lst = get_post_lst(reddit_data)
 save_posts(reddit_data, 'my_file1.json.gz') # saving posts
 ```
 
-
+# Content analysis
 ## Post comparison using tf and tf-idf
 using posts from r/TheLastAirbender for example (~130000 total posts)
 

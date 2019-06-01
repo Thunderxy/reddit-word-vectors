@@ -5,13 +5,13 @@ import pandas as pd
 from RAT.pushshift.classes import Post, from_timestamp
 
 
-class fPosts:
-    """Loading saved file."""
+class FPosts:
+    """File Posts for loading saved files."""
 
     def __init__(self, file_name):
         self.file_name = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + file_name)
 
-    def load_posts(self):
+    def load_posts_from_file(self):
         with gzip.GzipFile(self.file_name) as f:
             json_bytes = f.read()
 
@@ -35,3 +35,7 @@ class fPosts:
             post_object_lst.append(Post.make_post_obj(post))
 
         return post_object_lst
+
+    def load_posts(self):
+        """Loads posts as list of Post objects."""
+        return self.get_posts_list(self.load_posts_from_file())

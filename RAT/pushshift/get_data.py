@@ -4,7 +4,7 @@ import gzip
 import os
 import pandas as pd
 import time
-from RAT.pushshift.classes import Posts, Post, from_timestamp
+from RAT.pushshift.classes import Post, from_timestamp
 
 
 s = requests.Session()
@@ -63,13 +63,14 @@ def get_DataFrame(my_data):
             my_data.before = data[-1]['created_utc']
             new_posts = pd.DataFrame({'title': post['title'], 'id': post['id'], 'time': from_timestamp(post['created_utc'])} for post in data)
             posts = pd.concat([posts, new_posts], ignore_index=True, sort=False)
+            print('on date: {}'.format(from_timestamp(my_data.before)))
         else:
             break
 
     return posts
 
 
-def get_post_list(my_data):
+def get_posts_list(my_data):
 
     post_object_lst = []
 
@@ -79,6 +80,7 @@ def get_post_list(my_data):
 
         if data:
             my_data.before = data[-1]['created_utc']
+            print('on date: {}'.format(from_timestamp(my_data.before)))
             for post in data:
                 post_object_lst.append(Post.make_post_obj(post))
         else:
@@ -87,7 +89,7 @@ def get_post_list(my_data):
     return post_object_lst
 
 
-def get_post_gen(my_data):
+def get_posts_gen(my_data):
 
     while True:
         my_url = my_data.make_url()
@@ -104,6 +106,6 @@ def get_post_gen(my_data):
 
         yield post_object_lst
 
-
-r_data = Posts(size=10, subreddit='askreddit')
-x = get_post_gen(r_data)
+#
+# r_data = Posts(n=10, subreddit='askreddit')
+# x = get_post_gen(r_data)

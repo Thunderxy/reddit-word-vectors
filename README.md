@@ -4,59 +4,27 @@ Doing stuff with Reddit using https://pushshift.io/ and https://github.com/praw-
 
 ## Get posts with threading from pushshift and save them to .json.gz:
 ```Python
-from RAT.pushshift.get_data_threading import LoggerConfig, GetPosts, SavePosts # logging is optional
+from RAT.pushshift.get_data_threading import LoggerConfig # optional
+from RAT.pushshift.get_data_threading import GetPosts, SavePosts
 from RAT.pushshift.classes import Posts
 
-my_log = LoggerConfig(log_file='thread_log', level=logging.DEBUG, print_to_console=True)
+my_log = LoggerConfig(log_file='thread_log', level=logging.DEBUG, print_to_console=True) # optional
 reddit_data = Posts(after=1559390400, size=1000, subreddit='askreddit')
-GetPosts(r_data, thread_num=5, max_per_sec=1, make_log=my_log).get_data()
+posts = GetPosts(r_data, thread_num=5, max_per_sec=1, make_log=my_log).get_data() # data (posts) is global variable here
 SavePosts('my_file.json.gz').save_posts()
 ```
 
-======================================================================================
-## depreciated or needs docs update:
-## Working without saving posts
-### How to get posts from reddit using https://pushshift.io/
+## Loading posts from file:
 ```Python
-In [1]: from RAT.pushshift.get_data import Posts
-In [2]: my_data = Posts(n=1, size=25, sub='askreddit')     
+from RAT.pushshift.load_data import FPosts
+
+my_file = FPosts('my_file.json.gz')
+my_posts = my_file.load_posts() # list of Post objects
 ```
 
-
-### Get posts in list format or in DataFrame format
+### How to access post information from posts list
 ```Python
-In [3]: Posts_lst=my_data.get_post_list()    
-In [4]: Posts_df=my_data.get_DataFrame() 
-In [5]: Posts_lst 
-```
-
-```
-Out[5]: 
-[<RAT.pushshift.get_data.Post at 0x7f7de778deb8>,
- <RAT.pushshift.get_data.Post at 0x7f7de778d198>,
- <RAT.pushshift.get_data.Post at 0x7f7de778d0f0>,
-...]
-```
-
-```Python
-In [6]: Posts_df   
-```
-
-```
-Out[6]: 
-                                               title      id                time
-0   Teens of reddit whats the most rebellious thin...  bndqa8 2019-05-11 18:10:20
-1            Where is the most upvoted "F" on reddit?  bndq9r 2019-05-11 18:10:18
-2   What was the worst way you figured out you wer...  bndq5d 2019-05-11 18:10:03
-3                                        Just Curious  bndq4o 2019-05-11 18:10:01
-4   [NSFW] The fellas of Reddit, what desperate si...  bndq4a 2019-05-11 18:09:59
-...
-```
-
-
-### How to access post information from Posts object
-```Python
-In [7]: titles = [i.title for i in Posts_lst]  
+In [7]: titles = [i.title for i in my_posts]  
 ```
 ```
 Out[7]: 
@@ -69,8 +37,8 @@ Out[7]:
 
 ### Converting unix time to utc:
 ```Python
-In [8]: from RAT.pushshift.get_data import from_timestamp 
-In [9]: created_utc = [from_timestamp(i.created_utc) for i in Posts_lst] 
+In [8]: from RAT.pushshift.classes import from_timestamp 
+In [9]: created_utc = [from_timestamp(i.created_utc) for i in my_posts] 
 In [10]: created_utc 
 ```
 ```
@@ -85,30 +53,18 @@ https://github.com/pushshift/api for more info on parameters
 
 
 
-## Working with saved posts
-### Saving posts to .json.gz
+
+## No threading version (obsolete):
 ```Python
-In [1]: from RAT.pushshift.get_data import Posts
-In [2]: my_data = Posts(n=1, size=25, sub='askreddit')
-In [3]: my_data.save_posts('askreddit_data.json.gz')    # saves .json from pushshift
+from RAT.pushshift.get_data import get_post_list, get_DataFrame
+from RAT.pushshift.classes import Posts
+reddit_data = Posts(n=10, subreddit='askreddit') # gets n*25 new posts from r/askreddit
+posts_df = get_DataFrame(reddit_data)
+posts_lst = get_post_lst(reddit_data)
+
+save_posts(reddit_data, 'my_file1.json.gz') # saving posts
 ```
 
-### Loading saved posts
-```Python
-In [4]: from RAT.pushshift.get_data import fPosts   
-In [5]: my_file = fPosts('askreddit.json.gz')                                                                                                          
-In [6]: Posts = my_file.get_posts_list(my_file.load_posts())     # load file and convert it to list of Post objects
-In [7]: Posts
-```
-```
-Out[7]: 
-[<RAT.pushshift.get_data.Post at 0x7f568f782080>,
- <RAT.pushshift.get_data.Post at 0x7f568f7829e8>,
- <RAT.pushshift.get_data.Post at 0x7f568f6c04a8>,
-...]
-```
-
-======================================================================================
 
 ## Post comparison using tf and tf-idf
 using posts from r/TheLastAirbender for example (~130000 total posts)

@@ -2,6 +2,7 @@
 Doing stuff with Reddit using https://pushshift.io/ and https://github.com/praw-dev/praw .
 
 
+# Data gathering
 ## Get posts with threading from pushshift and save them to .json.gz:
 ```Python
 from RAT.pushshift.get_data_threading import LoggerConfig # optional

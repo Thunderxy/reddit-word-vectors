@@ -13,7 +13,7 @@ GetPosts(r_data, thread_num=5, max_per_sec=1, make_log=my_log).get_data()
 SavePosts('my_file.json.gz').save_posts()
 ```
 
-------------------------------------------------------------------------------------------------------------
+======================================================================================
 ## depreciated or needs docs update:
 ## Working without saving posts
 ### How to get posts from reddit using https://pushshift.io/
@@ -108,7 +108,7 @@ Out[7]:
 ...]
 ```
 
-------------------------------------------------------------------------------------------------------------
+======================================================================================
 
 ## Post comparison using tf and tf-idf
 using posts from r/TheLastAirbender for example (~130000 total posts)

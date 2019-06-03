@@ -11,7 +11,7 @@ from RAT.pushshift.classes import Posts
 
 my_log = LoggerConfig(log_file='thread_log', level=logging.DEBUG, print_to_console=True) # optional
 reddit_data = Posts(after=1559390400, size=1000, subreddit='askreddit')
-posts = GetPosts(r_data, thread_num=5, max_per_sec=1, make_log=my_log).get_data() # data (posts) is global variable here
+posts = GetPosts(reddit_data, thread_num=5, max_per_sec=1, make_log=my_log).get_data() # data (posts) is global variable here
 SavePosts('my_file.json.gz').save_posts()
 ```
 

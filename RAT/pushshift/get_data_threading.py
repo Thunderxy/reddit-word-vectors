@@ -123,9 +123,9 @@ class GetPosts:
         global_time = time.time()
 
         if limit > self.max_per_sec:
-            self.thread_log.warning('{} @ {} calls/s, throttling for {} s'.format(thread_name, limit, throttle_for))
-            lock.release()
+            self.thread_log.warning('{} over limit by {} calls/s, throttling for {} s'.format(thread_name, limit - self.max_per_sec, throttle_for))
             time.sleep(throttle_for)
+            lock.release()
         else:
             lock.release()
 

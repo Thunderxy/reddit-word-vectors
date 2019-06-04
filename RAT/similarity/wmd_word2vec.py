@@ -8,7 +8,7 @@ from RAT.similarity.text_preprocessing import unpickle_this
 import time
 
 my_file = fPosts('')
-Posts = my_file.get_posts_list(my_file.load_posts())
+Posts = my_file.get_content_list(my_file.load_posts())
 
 my_model = load_model('')
 

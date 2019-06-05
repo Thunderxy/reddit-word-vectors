@@ -5,12 +5,11 @@ import os
 import time
 import threading
 import logging
-from RAT.pushshift.classes import Posts, Comments, from_timestamp
+from RAT.pushshift.classes import Posts, Comments, timestamp_to_utc
 
 s = requests.Session()
 lock = threading.Lock()
-data = []
-api_calls = [0]
+api_calls = 0
 global_time = time.time()
 
 
@@ -29,6 +28,9 @@ class GetContent:
 
     def get_content(self):
         """Thread initialization function."""
+
+        global data
+        data = []
 
         start_time = time.time()
         intervals = self.get_intervals()
@@ -51,7 +53,7 @@ class GetContent:
         for t in threads_lst:
             t.join()
 
-        print('total time: {} s\ntotal api calls: {}'.format(time.time() - start_time, api_calls[0]))
+        print('total time: {} s\ntotal api calls: {}'.format(time.time() - start_time, api_calls))
         return data
 
     def get_intervals(self):
@@ -75,8 +77,7 @@ class GetContent:
 
         n = self.content.n
         for i in range(n):
-            self.throttler(thread_name)
-            api_calls[0] += 1
+            self.throttler()
 
             start_time = time.time()
 
@@ -86,9 +87,10 @@ class GetContent:
             if data_:
                 with lock:
                     data += data_
+                    api_calls += 1
 
                 iter_content.before = data_[-1]['created_utc']
-                self.thread_log.info('{} on cycle: {} | runtime: {} | last content date: {}'.format(thread_name, i, time.time() - start_time, from_timestamp(iter_content.before)))
+                self.thread_log.info('{} on cycle: {} | runtime: {:.2f} s | after: {} | before: {}'.format(thread_name, i, time.time() - start_time, timestamp_to_utc(iter_content.after), timestamp_to_utc(iter_content.before)))
             else:
                 break
 
@@ -100,7 +102,7 @@ class GetContent:
         get_from = s.get(url)
 
         while get_from.status_code != 200:
-            self.thread_log.warning('to many requests sleeping {}'.format(thread_name))
+            self.thread_log.debug('to many requests sleeping {}'.format(thread_name))
             time.sleep(5)
 
             try:
@@ -115,7 +117,7 @@ class GetContent:
         else:
             return None
 
-    def throttler(self, thread_name):
+    def throttler(self):
         """Throttles API connection."""
 
         global global_time
@@ -129,7 +131,7 @@ class GetContent:
         global_time = time.time()
 
         if limit > self.max_per_sec:
-            self.thread_log.warning('{} over limit by {} calls/s, throttling for {} s'.format(thread_name, limit - self.max_per_sec, throttle_for))
+            self.thread_log.debug('over limit by {:.2f} calls/s, throttling for {:.2f} s'.format(limit - self.max_per_sec, throttle_for))
             time.sleep(throttle_for)
             lock.release()
         else:
@@ -183,7 +185,7 @@ class SaveContent:
         json_str = json.dumps(data)
         json_bytes = json_str.encode('utf-8')
 
-        file_name_ = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + self.file_name)
+        file_name_ = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/reddit_data/' + self.file_name)
         with gzip.GzipFile(file_name_, 'w+') as f:
             f.write(json_bytes)
 

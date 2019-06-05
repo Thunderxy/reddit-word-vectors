@@ -4,7 +4,7 @@ import gzip
 import os
 import pandas as pd
 import time
-from RAT.pushshift.classes import Post, from_timestamp
+from RAT.pushshift.classes import Post, timestamp_to_utc
 
 
 s = requests.Session()
@@ -36,7 +36,7 @@ def save_posts(my_data, file_name):
             data = new_data
 
             my_data.before = data[-1]['created_utc']
-            print('{} - {} @ {} s'.format(i, from_timestamp(my_data.before), time.time() - start))
+            print('{} - {} @ {} s'.format(i, timestamp_to_utc(my_data.before), time.time() - start))
         else:
             break
 
@@ -61,9 +61,9 @@ def get_DataFrame(my_data):
 
         if data:
             my_data.before = data[-1]['created_utc']
-            new_posts = pd.DataFrame({'title': post['title'], 'id': post['id'], 'time': from_timestamp(post['created_utc'])} for post in data)
+            new_posts = pd.DataFrame({'title': post['title'], 'id': post['id'], 'time': timestamp_to_utc(post['created_utc'])} for post in data)
             posts = pd.concat([posts, new_posts], ignore_index=True, sort=False)
-            print('on date: {}'.format(from_timestamp(my_data.before)))
+            print('on date: {}'.format(timestamp_to_utc(my_data.before)))
         else:
             break
 
@@ -80,7 +80,7 @@ def get_posts_list(my_data):
 
         if data:
             my_data.before = data[-1]['created_utc']
-            print('on date: {}'.format(from_timestamp(my_data.before)))
+            print('on date: {}'.format(timestamp_to_utc(my_data.before)))
             for post in data:
                 post_object_lst.append(Post.make_post_obj(post))
         else:

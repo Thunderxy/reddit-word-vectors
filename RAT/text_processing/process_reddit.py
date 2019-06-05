@@ -16,8 +16,8 @@ def replace_numbers(sent):
     return text_nonum
 
 
-def tokenization(content):
-    tokens = re.split(r'\W+', content)
+def word_by_word(sent):
+    tokens = re.split(r'\W+', sent[0])
     tokens_no_empty = [word.lower() for word in tokens if word != '']
     return tokens_no_empty
 
@@ -28,32 +28,39 @@ def remove_stopword(tokenized_lst):
     return no_stopwords
 
 
-# broken
-# def clean_content(content):
-#     """
-#
-#     Args:
-#         content: [[sentence1], [sentence2], ..., [sentenceN]]
-#
-#     Returns:
-#
-#     """
-#     cleaned = []
-#
-#     for i in content:
-#         # words = remove_stopword(tokenization(remove_punctuation(i.title)))
-#
-#         words = tokenization(remove_punctuation(i.title))
-#         cleaned.append(words)
-#
-#     return cleaned
-#
-#
-# def clean_text(text):
-#     # words = remove_stopword(tokenization(remove_punctuation(text)))
-#     words = tokenization(remove_punctuation(text))
-#
-#     return words
+def word2vec_input(content):
+    """ Prepares content for word2vec.
+
+    notes:
+        sent_tokenize():  splits into sentences,
+        a: replaces numbers with stevilka, removes punctuation, replaces /n,
+        b: lowers,
+        c: splits sentence into words
+
+    Args:
+        content: list of post/comment objects
+        post.title: str, comment.body: str
+
+    Returns: sentences word by word in list [[w1, w2, ...], [w1, w2, ...], ...]
+                                              sent1          sent2
+    """
+    text_in_sent = []
+
+    for obj in content:
+
+        if obj.is_post:
+            tokenizer = obj.title
+        else:
+            tokenizer = obj.body
+
+        for sent in sent_tokenize(tokenizer):
+            # a = [replace_numbers(remove_punctuation(sent)).replace('\n', ' ')]
+            # b = [i.lower() for i in a]
+            # c = word_by_word(b)
+            # text_in_sent.append(c)
+            text_in_sent.append(word_by_word([i.lower() for i in [replace_numbers(remove_punctuation(sent)).replace('\n', ' ')]]))
+
+    return text_in_sent
 
 
 def count_words(tokenized_lst, sort=None):
@@ -86,38 +93,3 @@ def unpickle_this(file_name):
         data = pickle.load(f)
 
     return data
-
-
-def get_sentences(content):
-    """ Tokenizes posts/comments, removes punctuation, lowers strings
-
-    Args:
-        content: list of post/comment objects
-        post.title: str, comment.body: str
-
-    Returns: sentences in list [[sent1], [sent2], ...]
-
-    """
-    text_in_sent = []
-
-    for obj in content:
-
-        if obj.is_post:
-            tokenizer = obj.title
-        else:
-            tokenizer = obj.body
-
-        for sent in sent_tokenize(tokenizer):
-            # a = [remove_punctuation(sent).replace('\n', ' ')]
-            # b = [i.lower() for i in [remove_punctuation(sent).replace('\n', ' ')]]
-            # text.append(b)
-            text_in_sent.append([i.lower() for i in [replace_numbers(remove_punctuation(sent)).rstrip().replace('\n', ' ')]])
-
-    return text_in_sent
-
-
-# ex = ['I am a Dr. bot from U.S.A.. I am god at botting:). Have you ever talked to a bot?', 'beep boop. boop beep. i am a bot', 'hello there. fellow human. human fellow']
-
-# sp = get_sentences(ex)
-
-# print(sp)

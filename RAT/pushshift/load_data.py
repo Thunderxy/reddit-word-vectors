@@ -2,14 +2,14 @@ import json
 import gzip
 import os
 import pandas as pd
-from RAT.pushshift.classes import Post, Comment, from_timestamp
+from RAT.pushshift.classes import Post, Comment, timestamp_to_utc
 
 
 class Content:
     """For loading saved files."""
 
     def __init__(self, file_name):
-        self.file_name = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/' + file_name)
+        self.file_name = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/reddit_data/' + file_name)
 
     def load_content_from_file(self):
         with gzip.GzipFile(self.file_name) as f:
@@ -23,7 +23,7 @@ class Content:
     @staticmethod
     def get_post_DataFrame(data):
         posts = pd.DataFrame({'title': post['title'], 'id': post['id'],
-                              'time': from_timestamp(post['created_utc'])} for post in data)
+                              'time': timestamp_to_utc(post['created_utc'])} for post in data)
 
         return posts
 

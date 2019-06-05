@@ -1,6 +1,6 @@
 import time
 import sys
-from datetime import datetime
+import datetime
 
 
 class Posts:
@@ -84,6 +84,13 @@ class Comment:
                        comment['is_submitter'], comment['parent_id'], comment['score'], comment['subreddit'])
 
 
-def from_timestamp(unix_time):
-    """unix time -> utc time"""
-    return datetime.fromtimestamp(int(unix_time))
+def timestamp_to_utc(timestamp):
+    """timestamp -> utc time
+       print(timestamp_to_utc('1576022400'))"""
+    return datetime.datetime.utcfromtimestamp(int(timestamp))
+
+
+def utc_to_timestamp(utc_time):
+    """utc_time -> timestamp
+       print(utc_to_timestamp('2019-12-11 00:00:00'))"""
+    return int(datetime.datetime.strptime(utc_time, '%Y-%m-%d %H:%M:%S').replace(tzinfo=datetime.timezone.utc).timestamp())

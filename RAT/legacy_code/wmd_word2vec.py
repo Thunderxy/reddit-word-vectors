@@ -1,10 +1,10 @@
 # https://markroxor.github.io/gensim/static/notebooks/WM
 
 from gensim.similarities import WmdSimilarity
-from RAT.similarity.word2vec import load_model
-from RAT.similarity.text_preprocessing import clean_text
+from RAT.legacy_code.word2vec import load_model
+from RAT.text_processing.process_reddit import clean_text
 from RAT.pushshift.get_data import fPosts
-from RAT.similarity.text_preprocessing import unpickle_this
+from RAT.text_processing.process_reddit import unpickle_this
 import time
 
 my_file = fPosts('')

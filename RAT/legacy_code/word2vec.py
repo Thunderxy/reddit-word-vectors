@@ -3,7 +3,6 @@ from gensim.test.utils import get_tmpfile
 import os
 import logging
 import multiprocessing
-import numpy as np
 
 
 def make_model(post_data, size_=300, window_=2, min_count_=2, epochs_=1):
@@ -32,13 +31,15 @@ def load_model(file_name):
     return Word2Vec.load(path)
 
 
-def cos_sim(a, b):
-    a = np.squeeze(a)
-    b = np.squeeze(b)
-
-    angle = np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
-
-    if np.isnan(angle):
-        return 0
-    else:
-        return angle
+# def cos_sim(a, b):
+#     import numpy as np
+#
+#     a = np.squeeze(a)
+#     b = np.squeeze(b)
+#
+#     angle = np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+#
+#     if np.isnan(angle):
+#         return 0
+#     else:
+#         return angle

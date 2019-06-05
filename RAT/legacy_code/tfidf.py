@@ -1,4 +1,4 @@
-from RAT.pushshift.get_data import from_timestamp
+from RAT.pushshift.get_data import timestamp_to_utc
 import numpy as np
 import math
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
@@ -41,7 +41,7 @@ def get_matches(n, post_data, vec):
     sorted_index_list = index[np.argsort(vec[index])][::-1].tolist()
 
     for i in sorted_index_list:
-        print('{:0.2f} | {} | {} | {}'.format(vec.item(i), from_timestamp(post_data[i].created_utc), post_data[i].post_id, post_data[i].title))
+        print('{:0.2f} | {} | {} | {}'.format(vec.item(i), timestamp_to_utc(post_data[i].created_utc), post_data[i].post_id, post_data[i].title))
 
     return sorted_index_list
 

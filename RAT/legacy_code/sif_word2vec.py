@@ -1,4 +1,4 @@
-from RAT.similarity.text_preprocessing import clean_text
+from RAT.text_processing.process_reddit import clean_text
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import PCA

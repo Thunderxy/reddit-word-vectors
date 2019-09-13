@@ -1,2 +1,3 @@
 # RAT (Reddit analysis tool)
-Doing stuff with Reddit data using https://pushshift.io/ .
+- downloads reddit posts and comments from pushshift using threads
+- makes word2vec model from extracted sentances using gensim library

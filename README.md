@@ -1,5 +1,5 @@
 # RAT (Reddit analysis tool)
 - downloads reddit posts and comments from pushshift using threads
-- makes word2vec model from extracted sentances using gensim library
+- makes word2vec model from extracted sentences using gensim library
 
-Examples are in examples directory.
+See examples directory for more info on how to use this script.

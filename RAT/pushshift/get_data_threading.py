@@ -54,6 +54,7 @@ class GetContent:
             t.join()
 
         print('total time: {} s\ntotal api calls: {}'.format(time.time() - start_time, api_calls))
+        print('number of posts/comments collected: {}'.format(len(data)))
         return data
 
     def get_intervals(self):

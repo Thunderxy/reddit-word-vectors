@@ -15,20 +15,26 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 
 
 class MySentences:
+    """ Iterator class that produces list of words for each given sentence. """
 
     def __init__(self, file_name_lst):
+        """
+        Args:
+            file_name_lst: list
+            list of files of form .json.gz that contain reddit data
+        """
         self.file_name_lst = file_name_lst
 
     def __iter__(self):
         for file_name in self.file_name_lst:
-            obj_content = self.preprocess(file_name)
+            obj_content = self.load_obj(file_name)          # list of comment/post objects (read: .__dict__)
             for obj in obj_content:
-                sent_lst = word2vec_input([obj])
+                sent_lst = word2vec_input([obj])            # process sentences in comment.post
                 for sent in sent_lst:
                     yield sent
 
     @staticmethod
-    def preprocess(file_name):
+    def load_obj(file_name):
         file_content = Content(file_name)
 
         if 'comments' in file_name:

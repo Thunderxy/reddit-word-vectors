@@ -67,12 +67,11 @@ class Post:
 
 class Comment:
 
-    def __init__(self, author, body, created_utc, link_id, is_submitter, parent_id, score, subreddit):
+    def __init__(self, author, body, created_utc, link_id, parent_id, score, subreddit):
         self.author = author
         self.body = body
         self.created_utc = created_utc
         self.link_id = link_id
-        self.is_submitter = is_submitter
         self.parent_id = parent_id
         self.score = score
         self.subreddit = subreddit
@@ -81,7 +80,7 @@ class Comment:
     @staticmethod
     def make_comment_obj(comment):
         return Comment(comment['author'], comment['body'], comment['created_utc'], comment['link_id'],
-                       comment['is_submitter'], comment['parent_id'], comment['score'], comment['subreddit'])
+                       comment['parent_id'], comment['score'], comment['subreddit'])
 
 
 def timestamp_to_utc(timestamp):

@@ -7,7 +7,7 @@ import time
 def get_from_reddit(n, after_, before_):
     my_log = LoggerConfig(log_file='thread_log{}'.format(n), level=logging.DEBUG, print_to_console=True)
     reddit_comments = Comments(after=after_, before=before_, size=1000, subreddit='askreddit')
-    GetContent(reddit_comments, thread_num=3, max_per_sec=1, make_log=my_log).get_content()
+    GetContent(reddit_comments, thread_num=4, max_per_sec=1, make_log=my_log).get_content()
     SaveContent('askreddit_comments{}.json.gz'.format(n)).save_content()
     time.sleep(1)
 
@@ -25,4 +25,4 @@ def chunk_it(days, per_day):
         print(timestamp_to_utc(t1))
 
 
-chunk_it(5, 1)
+chunk_it(14, 1)

@@ -24,18 +24,23 @@ def word_by_word(sent):
 def word2vec_input(content):
     """ Prepares content for word2vec.
 
-    notes:
-        sent_tokenize():  splits into sentences,
-        a: replaces numbers with stevilka, removes punctuation, replaces /n,
-        b: lowers,
-        c: splits sentence into words
-
-    Args:
-        content: list of post/comment objects
+    Parameters
+    ----------
+    content: list of post/comment objects
         post.title: str, comment.body: str
 
-    Returns: sentences word by word in list [[w1, w2, ...], [w1, w2, ...], ...]
-                                              sent1          sent2
+    Notes
+    -----
+    sent_tokenize():  splits into sentences and replaces all links with "link",
+    a: replaces numbers with "number", removes punctuation, replaces /n,
+    b: lowers,
+    c: splits sentence into words
+
+    Returns
+    -------
+    Sentences word by word in list: [[w1, w2, ...], [w1, w2, ...], ...]
+                                        sent1          sent2
+
     """
     text_in_sent = []
 
@@ -59,13 +64,11 @@ def word2vec_input(content):
 def doc2vec_input(content):
     w2v_input = word2vec_input(content)
 
-    doc = ''
+    doc = []
     for sent in w2v_input:
-        doc += ' '.join(sent) + '. '
+        doc += sent
 
-    doc = doc[:-1]
-
-    return [doc]
+    return doc
 
 
 def count_words(tokenized_lst, sort=None):

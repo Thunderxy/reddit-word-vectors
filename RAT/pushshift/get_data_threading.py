@@ -5,7 +5,8 @@ import os
 import time
 import threading
 import logging
-from RAT.pushshift.classes import Posts, Comments, timestamp_to_utc
+import datetime
+from RAT.pushshift.classes import Posts, Comments
 
 
 class GetContent:
@@ -110,7 +111,6 @@ class GetContent:
         None when done.
 
         """
-
         c = 0
         while True:
             self.throttler(thread_name)
@@ -186,13 +186,27 @@ class GetContent:
         json_str = json.dumps(self.data)
         json_bytes = json_str.encode('utf-8')
 
-        # file_name_ = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/reddit_data/' + file_name)
-        with gzip.GzipFile(file_name, 'w+') as f:
+        file_name += '.json.gz'
+
+        file_name_ = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/reddit_data/' + file_name)
+        with gzip.GzipFile(file_name_, 'w+') as f:
             f.write(json_bytes)
 
         logging.info('created: {}\n'.format(file_name))
 
         return True
+
+
+def timestamp_to_utc(timestamp):
+    """timestamp -> utc time
+       print(timestamp_to_utc('1576022400'))"""
+    return datetime.datetime.utcfromtimestamp(int(timestamp))
+
+
+def utc_to_timestamp(utc_time):
+    """utc_time -> timestamp
+       print(utc_to_timestamp('2019-12-11 00:00:00'))"""
+    return int(datetime.datetime.strptime(utc_time, '%Y-%m-%d %H:%M:%S').replace(tzinfo=datetime.timezone.utc).timestamp())
 
 
 if __name__ == '__main__':
@@ -205,7 +219,7 @@ if __name__ == '__main__':
         for dct in a.data:
             print(dct['body'])
 
-        a.save_content('my_first_save.json.gz')
+        a.save_content('my_first_save')
 
 
     get_from_reddit(time.time()-1000, time.time(), 'askreddit', 1000)

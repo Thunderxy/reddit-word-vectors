@@ -8,16 +8,6 @@ from gensim.models import Word2Vec, FastText, KeyedVectors
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 
 
-data = ["I love machine learning. Its awesome.",
-        "I love coding in python",
-        "I love building chatbots",
-        "they chat amagingly well"]
-
-tagged_data = [TaggedDocument(_d.lower(), tags=[str(i)]) for i, _d in enumerate(data)]
-
-# print(tagged_data)
-
-
 class SentenceIter:
 
     def __init__(self, file_name_lst, content, model_type):

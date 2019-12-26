@@ -125,6 +125,11 @@ class WordEmbedding:
 
         BS default: 2000000
 
+        Notes
+        -----
+        Path to saved data: path = str(Path(os.path.abspath(__file__)).parents[1]) + '/data/reddit_data'
+        Sentences and words in model: total sentences: self.model.corpus_count, total words: self.model.corpus_total_words
+
         Returns
         -------
         self
@@ -148,8 +153,6 @@ class WordEmbedding:
             raise NameError
 
         self.model.build_vocab(sents_iter)
-
-        # print('total sentences:', self.model.corpus_count, 'total words:', self.model.corpus_total_words)
 
         if self.model_type == 'doc2vec':
             self.model.train(documents=sents_iter, total_examples=self.model.corpus_count, epochs=epochs)
@@ -188,36 +191,4 @@ class WordEmbedding:
             else:
                 raise NameError
 
-        return self
-
-
-if __name__ == '__main__':
-
-    dir_path = str(Path(os.path.abspath(__file__)).parents[1]) + '/data/reddit_data'
-    file_lst = os.listdir(dir_path)
-
-    # iterator stuff
-    saved_reddit = []
-
-    for file in file_lst:
-        if file != '.gitignore':
-            saved_reddit.append(file)
-
-    # sents_iter = SentenceIter(saved_reddit, content='comment', model_type='doc2vec')
-    #
-    # for i in sents_iter:
-    #     pass
-
-    # print(saved_reddit)
-
-    ft = WordEmbedding(model_type='doc2vec')
-    ft.make_model(sentences=saved_reddit, content='comment', epochs=10, size=300, window=5, min_count=10)
-    ft.save_model('test_model.kv')
-
-    # ft.load_model('test_model.kv')
-    #
-    # model = ft.model
-    #
-    # from RAT.vector_model.plot_model import plot_model
-    #
-    # plot_model(model)
+        return self.model

@@ -124,6 +124,7 @@ class GetContent:
                 with self.lock:
                     self.data += data_
                     self.api_calls += 1
+                    print('on api call: {}'.format(self.api_calls))
 
                 iter_content.before = data_[-1]['created_utc']
 
@@ -207,19 +208,3 @@ def utc_to_timestamp(utc_time):
     """utc_time -> timestamp
        print(utc_to_timestamp('2019-12-11 00:00:00'))"""
     return int(datetime.datetime.strptime(utc_time, '%Y-%m-%d %H:%M:%S').replace(tzinfo=datetime.timezone.utc).timestamp())
-
-
-if __name__ == '__main__':
-
-    def get_from_reddit(after_, before_, subreddit, size):
-
-        a = GetContent(after=after_, before=before_, subreddit=subreddit,
-                       size=size, content='comment', thread_num=2, max_per_sec=1, log_level='info').get_content()
-
-        for dct in a.data:
-            print(dct['body'])
-
-        a.save_content('my_first_save')
-
-
-    get_from_reddit(time.time()-1000, time.time(), 'askreddit', 1000)

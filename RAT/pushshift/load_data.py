@@ -1,54 +1,47 @@
 import json
 import gzip
 import os
-import pandas as pd
-from RAT.pushshift.classes import Post, Comment, timestamp_to_utc
+from RAT.pushshift.classes import Post, Comment
 
 
 class Content:
-    """For loading saved files."""
+    """ For loading saved files."""
 
     def __init__(self, file_name):
+        if '.json.gz' not in file_name:
+            file_name += '.json.gz'
+
         self.file_name = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../data/reddit_data/' + file_name)
+        self.data = None
 
     def load_content_from_file(self):
+        """ Loads saved .json.gz file as is. """
         with gzip.GzipFile(self.file_name) as f:
             json_bytes = f.read()
 
         json_str = json_bytes.decode('utf-8')
-        data = json.loads(json_str)
+        self.data = json.loads(json_str)
 
-        return data
+        return self
 
-    @staticmethod
-    def get_post_DataFrame(data):
-        posts = pd.DataFrame({'title': post['title'], 'id': post['id'],
-                              'time': timestamp_to_utc(post['created_utc'])} for post in data)
+    def load_posts(self):
+        """ Loads posts as list of Post objects. """
+        self.load_content_from_file()
 
-        return posts
-
-    @staticmethod
-    def get_post_list(data):
         post_object_lst = []
 
-        for post in data:
+        for post in self.data:
             post_object_lst.append(Post.make_post_obj(post))
 
         return post_object_lst
 
-    @staticmethod
-    def get_comment_list(data):
+    def load_comments(self):
+        """ Loads comments as list of Comment objects. """
+        self.load_content_from_file()
+
         comment_object_lst = []
 
-        for comment in data:
+        for comment in self.data:
             comment_object_lst.append(Comment.make_comment_obj(comment))
 
         return comment_object_lst
-
-    def load_posts(self):
-        """Loads posts as list of Post objects."""
-        return self.get_post_list(self.load_content_from_file())
-
-    def load_comments(self):
-        """Loads comments as list of Comment objects."""
-        return self.get_comment_list(self.load_content_from_file())

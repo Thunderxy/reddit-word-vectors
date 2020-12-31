@@ -6,7 +6,7 @@ import time
 import threading
 import logging
 import datetime
-from RAT.pushshift.classes import Posts, Comments
+from RWV.pushshift.classes import Posts, Comments
 
 
 class GetContent:

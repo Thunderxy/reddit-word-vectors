@@ -1,7 +1,7 @@
 import json
 import gzip
 import os
-from RAT.pushshift.classes import Post, Comment
+from RWV.pushshift.classes import Post, Comment
 
 
 class Content:

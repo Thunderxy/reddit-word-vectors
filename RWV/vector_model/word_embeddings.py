@@ -2,8 +2,8 @@ import logging
 import os
 import multiprocessing
 from pathlib import Path
-from RAT.pushshift.load_data import Content
-from RAT.text_processing.process_reddit import word2vec_input, doc2vec_input
+from RWV.pushshift.load_data import Content
+from RWV.text_processing.process_reddit import word2vec_input, doc2vec_input
 from gensim.models import Word2Vec, FastText, KeyedVectors
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 

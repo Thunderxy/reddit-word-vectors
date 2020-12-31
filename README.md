@@ -1,4 +1,4 @@
-# RAT (Reddit analysis tool)
+# RWV (Reddit Word Vectors)
 - downloads reddit posts and comments from pushshift using threads
 - makes Word2vec, Doc2vec or FastText model from extracted sentences using Gensim library
 
